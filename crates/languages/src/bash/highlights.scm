@@ -8,7 +8,15 @@
 
 (command_name) @function
 
-(variable_name) @property
+(variable_name) @variable
+
+[
+  "export"
+  "function"
+  "unset"
+  "local"
+  "declare"
+] @keyword
 
 [
   "case"
@@ -17,20 +25,15 @@
   "elif"
   "else"
   "esac"
-  "export"
   "fi"
   "for"
-  "function"
   "if"
   "in"
   "select"
   "then"
-  "unset"
   "until"
   "while"
-  "local"
-  "declare"
-] @keyword
+] @keyword.control
 
 (comment) @comment
 

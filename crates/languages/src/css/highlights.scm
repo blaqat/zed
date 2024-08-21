@@ -9,21 +9,30 @@
 [
   "~"
   ">"
+  "only"
+] @operator
+
+[
   "+"
   "-"
   "*"
   "/"
+] @operator.arithmetic
+
+[
   "="
   "^="
   "|="
   "~="
   "$="
   "*="
+] @operator.assignment
+
+[
   "and"
   "or"
   "not"
-  "only"
-] @operator
+] @operator.logical
 
 (attribute_selector (plain_value) @string)
 

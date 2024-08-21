@@ -3,12 +3,15 @@
 "return" @keyword
 
 [
- "goto"
+	"goto"
+] @keyword.control
+
+[
  "in"
  "local"
 ] @keyword
 
-(break_statement) @keyword
+(break_statement) @keyword.control
 
 (do_statement
 [
@@ -21,13 +24,13 @@
   "while"
   "do"
   "end"
-] @keyword)
+] @keyword.control)
 
 (repeat_statement
 [
   "repeat"
   "until"
-] @keyword)
+] @keyword.control)
 
 (if_statement
 [
@@ -36,27 +39,27 @@
   "else"
   "then"
   "end"
-] @keyword)
+] @keyword.control)
 
 (elseif_statement
 [
   "elseif"
   "then"
   "end"
-] @keyword)
+] @keyword.control)
 
 (else_statement
 [
   "else"
   "end"
-] @keyword)
+] @keyword.control)
 
 (for_statement
 [
   "for"
   "do"
   "end"
-] @keyword)
+] @keyword.control)
 
 (function_declaration
 [
@@ -76,7 +79,7 @@
  "and"
  "not"
  "or"
-] @operator
+] @operator.logical
 
 [
   "+"
@@ -84,21 +87,33 @@
   "*"
   "/"
   "%"
+  "//"
   "^"
-  "#"
+] @operator.arithmetic
+
+[
   "=="
   "~="
   "<="
   ">="
   "<"
   ">"
+] @operator.comparison
+
+[
   "="
+] @operator.assignment
+
+[
   "&"
   "~"
   "|"
   "<<"
   ">>"
-  "//"
+] @operator.bitwise
+
+[
+  "#"
   ".."
 ] @operator
 
@@ -162,7 +177,7 @@
 
 ;; Functions
 
-(parameters (identifier) @parameter)
+(parameters (identifier) @variable.parameter)
 
 (function_call
   name: [
@@ -172,9 +187,18 @@
 
 (function_declaration
   name: [
-    (identifier) @function.definition
-    (dot_index_expression field: (identifier) @function.definition)
+    (identifier) @function.declaration
+    (_
+    	field: (identifier) @function.declaration
+   		method: (identifier) @function.declaration)
   ])
+
+(function_declaration
+	name: (_ table: (identifier))
+	(parameters
+		((identifier) @variable.special
+		 (#eq? @variable.special "self")))
+	)
 
 (method_index_expression method: (identifier) @function.method)
 

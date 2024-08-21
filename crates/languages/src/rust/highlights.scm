@@ -1,7 +1,12 @@
+
+(identifier) @variable
 (type_identifier) @type
-(primitive_type) @type.builtin
+(primitive_type) @type.builtin.primitive
 (self) @variable.special
 (field_identifier) @property
+
+(parameter
+	pattern: (identifier) @variable.parameter)
 
 (trait_item name: (type_identifier) @type.interface)
 (impl_item trait: (type_identifier) @type.interface)
@@ -27,6 +32,7 @@
       field: (field_identifier) @function.method)
   ])
 
+
 (function_item name: (identifier) @function.definition)
 (function_signature_item name: (identifier) @function.definition)
 
@@ -35,10 +41,23 @@
     (identifier) @function.special
     (scoped_identifier
       name: (identifier) @function.special)
-  ])
+  ]
+  "!" @function
+)
 
 (macro_definition
   name: (identifier) @function.special.definition)
+
+(_
+	[
+	function: (identifier) @function.builtin
+	macro: (identifier) @function.builtin
+	]
+	(#match?
+	 @function.builtin
+	 "^(println|print|eprintln|eprint|format|panic|assert|assert_eq|assert_ne|dbg|todo|unimplemented|try|matches|include|include_str|include_bytes|concat|env|option_env|cfg|cfg_attr|compile_error|line|column|file|module_path|stringify|vec|format_args|write|writeln|unreachable)$")
+	"!" @function.builtin.
+)
 
 ; Identifier conventions
 
@@ -49,6 +68,20 @@
 ; Assume all-caps names are constants
 ((identifier) @constant
  (#match? @constant "^_*[A-Z][A-Z\\d_]*$"))
+(const_item
+	name: (identifier) @constant)
+
+; Builtin Types and Constants
+
+((identifier) @type.builtin
+	(#match?
+	 @type.builtin
+	"^(String|Result|Option|Box|Vec|HashMap|HashSet|BTreeMap|BTreeSet|Rc|Arc|Cell|RefCell|Mutex|RwLock|Cow|Path|PathBuf|OsString|OsStr|IpAddr|SocketAddr|Ipv4Addr|Ipv6Addr|Duration|Instant|SystemTime|Pin|Poll|Future|Stream|Pin|Task|Waker|RawWaker|RawWakerVTable)$") )
+
+((identifier) @type.builtin
+	(#match?
+	 @type.builtin
+	 "^(None|Some|Ok|Err)$"))
 
 [
   "("
@@ -68,6 +101,7 @@
   ";"
   ","
   "::"
+  "."
 ] @punctuation.delimiter
 
 [
@@ -76,44 +110,46 @@
 
 [
   "as"
-  "async"
-  "await"
-  "break"
   "const"
-  "continue"
   "default"
   "dyn"
-  "else"
   "enum"
   "extern"
   "fn"
-  "for"
-  "if"
   "impl"
   "in"
   "let"
-  "loop"
   "macro_rules!"
-  "match"
   "mod"
   "move"
   "pub"
   "ref"
-  "return"
   "static"
   "struct"
   "trait"
   "type"
   "union"
-  "unsafe"
   "use"
   "where"
-  "while"
-  "yield"
   (crate)
   (mutable_specifier)
   (super)
 ] @keyword
+
+[
+  "await"
+  "break"
+  "continue"
+  "else"
+  "for"
+  "if"
+  "loop"
+  "match"
+  "return"
+  "unsafe"
+  "while"
+  "yield"
+] @keyword.control
 
 [
   (string_literal)
@@ -126,7 +162,7 @@
   (float_literal)
 ] @number
 
-(boolean_literal) @constant
+(boolean_literal) @boolean
 
 [
   (line_comment)
@@ -139,48 +175,70 @@
 ] @comment.doc
 
 [
-  "!"
-  "!="
-  "%"
-  "%="
-  "&"
-  "&="
-  "&&"
-  "*"
-  "*="
-  "*"
-  "+"
-  "+="
-  ","
-  "-"
-  "-="
   "->"
-  "."
   ".."
   "..="
   "..."
-  "/"
-  "/="
   ":"
-  ";"
+  "@"
+] @operator
+
+[
+	"%"
+	"*"
+	"+"
+	"-"
+	"/"
+] @operator.arithmetic
+
+[
+  "&&"
+  "||"
+  "?"
+] @operator.logical
+(unary_expression ("!") @operator.logical)
+
+[
+  "&"
+  "&="
+  "|"
+  "|="
+  "^"
+  "^="
   "<<"
   "<<="
+  ">>"
+  ">>="
+] @operator.bitwise
+
+[
+  "%="
+  "*="
+  "+="
+  "-="
+  "/="
+  "="
+] @operator.assignment
+
+[
+  "!="
   "<"
   "<="
-  "="
   "=="
   "=>"
   ">"
   ">="
-  ">>"
-  ">>="
-  "@"
-  "^"
-  "^="
-  "|"
-  "|="
-  "||"
-  "?"
-] @operator
+] @operator.comparison
 
 (lifetime) @lifetime
+
+(inner_attribute_item
+	"#" @attribute
+	"!" @attribute
+	(attribute
+		(identifier) @attribute))
+
+(attribute_item
+	"#" @attribute
+	(attribute
+		(identifier) @attribute))

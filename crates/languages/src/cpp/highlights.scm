@@ -52,28 +52,16 @@
 [
   "alignas"
   "alignof"
-  "break"
-  "case"
-  "catch"
   "class"
-  "co_await"
-  "co_return"
-  "co_yield"
   "concept"
   "constexpr"
-  "continue"
   "decltype"
-  "default"
   "delete"
-  "do"
-  "else"
   "enum"
   "explicit"
   "extern"
   "final"
-  "for"
   "friend"
-  "if"
   "inline"
   "namespace"
   "new"
@@ -83,24 +71,39 @@
   "protected"
   "public"
   "requires"
-  "return"
   "sizeof"
   "struct"
-  "switch"
   "template"
-  "throw"
-  "try"
   "typedef"
   "typename"
   "union"
   "using"
-  "while"
-  (primitive_type)
-  (sized_type_specifier)
-  (storage_class_specifier)
-  (type_qualifier)
-  (virtual)
+  "primitive_type"
+  "sized_type_specifier"
+  "storage_class_specifier"
+  "type_qualifier"
+  "virtual"
 ] @keyword
+
+[
+  "break"
+  "case"
+  "catch"
+  "co_await"
+  "co_return"
+  "co_yield"
+  "continue"
+  "default"
+  "do"
+  "else"
+  "for"
+  "if"
+  "return"
+  "switch"
+  "throw"
+  "try"
+  "while"
+] @keyword.control
 
 [
   "#define"
@@ -112,16 +115,19 @@
   "#ifndef"
   "#include"
   (preproc_directive)
-] @keyword
+] @keyword.special
 
 (comment) @comment
 
 [
-  (true)
-  (false)
   (null)
   ("nullptr")
 ] @constant
+
+[
+	(true)
+  (false)
+] @boolean
 
 (number_literal) @number
 
@@ -153,43 +159,56 @@
   ".*"
   "->*"
   "~"
-  "-"
-  "--"
-  "-="
-  "->"
-  "="
-  "!"
-  "!="
-  "|"
-  "|="
+  "?"
+] @operator
+
+[
+	"!"
   "||"
-  "^"
-  "^="
-  "&"
-  "&="
   "&&"
-  "+"
-  "++"
-  "+="
-  "*"
-  "*="
-  "/"
-  "/="
-  "%"
-  "%="
+] @operator.logical
+
+[
+  "|"
+  "^"
+  "&"
   "<<"
-  "<<="
   ">>"
+] @operator.bitwise
+
+[
+  "="
+  "--"
+  "++"
+  "^="
+	"|="
+	"<<="
   ">>="
+  "-="
+  "&="
+  "+="
+  "*="
+  "/="
+  "%="
+] @operator.assignment
+
+[
+  "-"
+  "+"
+  "*"
+  "/"
+  "%"
+] @operator.arithmetic
+
+[
+  "!="
   "<"
   "=="
   ">"
   "<="
   ">="
   "<=>"
-  "||"
-  "?"
-] @operator
+] @operator.comparison
 
 (conditional_expression ":" @operator)
 (user_defined_literal (literal_suffix) @operator)

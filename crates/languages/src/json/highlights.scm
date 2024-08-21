@@ -8,10 +8,13 @@
 (number) @number
 
 [
-  (true)
-  (false)
   (null)
-] @constant
+] @constant.builtin
+
+[
+	(true)
+  (false)
+] @boolean
 
 [
   "{"
@@ -19,3 +22,10 @@
   "["
   "]"
 ] @punctuation.bracket
+
+[
+	","
+	":"
+] @punctuation.delimiter
+
+; "\"" @punctuation

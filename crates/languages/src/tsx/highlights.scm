@@ -1,6 +1,7 @@
 ; Variables
 
 (identifier) @variable
+(required_parameter (identifier) @variable.parameter)
 
 ; Properties
 
@@ -17,12 +18,17 @@
   function: (member_expression
     property: (property_identifier) @function.method))
 
+((identifier) @function.builtin
+	(#match?
+	 @function.builtin
+	 "^(eval|require|exports|process|setTimeout|clearTimeout|setInterval|clearInterval|setImmediate|clearImmediate|alert|confirm|prompt|open|close)$"))
+
 ; Function and method definitions
 
 (function_expression
   name: (identifier) @function)
 (function_declaration
-  name: (identifier) @function)
+  name: (identifier) @function.declaration)
 (method_definition
   name: (property_identifier) @function.method)
 
@@ -45,13 +51,29 @@
 
 ; Special identifiers
 
-((identifier) @constructor
- (#match? @constructor "^[A-Z]"))
-
 ((identifier) @type
  (#match? @type "^[A-Z]"))
 (type_identifier) @type
 (predefined_type) @type.builtin
+((predefined_type) @type.builtin.primitive
+	(#match?
+	 @type.builtin.primitive
+	 "^(boolean|number|string|object|symbol|any)$"))
+
+((identifier) @variable.special
+		(#match? @variable.special "^(NaN|Infinity)$"))
+
+(lexical_declaration
+	kind: "const"
+	(variable_declarator
+	  name: (identifier) @constant))
+
+; Builtin Namespaces
+
+((identifier) @variable.special
+	(#match?
+   @variable.special
+   "^(console|window|document|arguments|process)$"))
 
 ([
   (identifier)
@@ -83,6 +105,7 @@
   (template_literal_type)
 ] @string
 
+
 (escape_sequence) @string.escape
 
 (regex) @string.regex
@@ -100,51 +123,65 @@
 ] @punctuation.delimiter
 
 [
-  "-"
+  "=>"
+] @operator
+
+[
+	"/"
+  "%"
+	"-"
+  "+"
+  "*"
+  "**"
+] @operator.arithmetic
+
+[
+  "="
   "--"
   "-="
-  "+"
-  "++"
   "+="
-  "*"
   "*="
-  "**"
   "**="
-  "/"
   "/="
-  "%"
   "%="
+  "<<="
+  ">>="
+  ">>>="
+  "^="
+  "&="
+  "|="
+  "&&="
+  "||="
+  "??="
+] @operator.assignment
+
+[
   "<"
   "<="
-  "<<"
-  "<<="
-  "="
   "=="
   "==="
-  "!"
-  "!="
-  "!=="
-  "=>"
   ">"
   ">="
+  "!="
+  "!=="
+] @operator.comparison
+
+[
+  "<<"
   ">>"
-  ">>="
   ">>>"
-  ">>>="
   "~"
   "^"
   "&"
   "|"
-  "^="
-  "&="
-  "|="
+] @operator.bitwise
+
+[
   "&&"
   "||"
   "??"
-  "&&="
-  "||="
-  "??="
-] @operator
+  "!"
+] @operator.logical
 
 [
   "("
@@ -155,57 +192,7 @@
   "}"
 ]  @punctuation.bracket
 
-[
-  "as"
-  "async"
-  "await"
-  "break"
-  "case"
-  "catch"
-  "class"
-  "const"
-  "continue"
-  "debugger"
-  "default"
-  "delete"
-  "do"
-  "else"
-  "export"
-  "extends"
-  "finally"
-  "for"
-  "from"
-  "function"
-  "get"
-  "if"
-  "import"
-  "in"
-  "instanceof"
-  "let"
-  "new"
-  "of"
-  "return"
-  "satisfies"
-  "set"
-  "static"
-  "switch"
-  "target"
-  "throw"
-  "try"
-  "typeof"
-  "using"
-  "var"
-  "void"
-  "while"
-  "with"
-  "yield"
-] @keyword
-
 (template_substitution
-  "${" @punctuation.special
-  "}" @punctuation.special) @embedded
-
-(template_type
   "${" @punctuation.special
   "}" @punctuation.special) @embedded
 
@@ -214,6 +201,54 @@
   ">" @punctuation.bracket)
 
 ; Keywords
+
+[
+  "as"
+  "await"
+  "class"
+  "const"
+  "delete"
+  "export"
+  "extends"
+  "from"
+  "function"
+  "get"
+  "import"
+  "in"
+  "instanceof"
+  "let"
+  "new"
+  "of"
+  "set"
+  "static"
+  "target"
+  "typeof"
+  "var"
+  "void"
+  "yield"
+] @keyword
+
+[
+	"async"
+  "break"
+  "case"
+  "catch"
+  "continue"
+  "debugger"
+  "default"
+  "do"
+  "else"
+  "finally"
+  "for"
+  "if"
+  "return"
+  "satisfies"
+  "switch"
+  "throw"
+  "try"
+  "while"
+  "with"
+] @keyword.control
 
 [ "abstract"
   "declare"
@@ -229,14 +264,19 @@
   "type"
   "readonly"
   "override"
+  ((identifier) @keyword
+	(#match?
+     @keyword
+     "^(global|module)$"))
 ] @keyword
 
 ; JSX elements
+
 (jsx_opening_element (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
 (jsx_closing_element (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
 (jsx_self_closing_element (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
 
 (jsx_attribute (property_identifier) @attribute)
-(jsx_opening_element (["<" ">"]) @punctuation.bracket)
-(jsx_closing_element (["</" ">"]) @punctuation.bracket)
-(jsx_self_closing_element (["<" "/>"]) @punctuation.bracket)
+(jsx_opening_element (["<" ">"]) @punctuation.bracket.tag)
+(jsx_closing_element (["</" ">"]) @punctuation.bracket.tag)
+(jsx_self_closing_element (["<" "/>"]) @punctuation.bracket.tag)

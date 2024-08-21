@@ -153,7 +153,7 @@
 
 (comment) @comment
 
-(documentation_comment) @comment.documentation
+(documentation_comment) @comment.doc
 
 ; Keywords
 ; --------------------

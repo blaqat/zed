@@ -120,7 +120,7 @@ field_constant: (IDENTIFIER) @constant
   "suspend"
   "nosuspend"
   "resume"
-] @keyword.coroutine
+] @keyword.control.coroutine
 
 [
   "fn"
@@ -130,39 +130,39 @@ field_constant: (IDENTIFIER) @constant
   "and"
   "or"
   "orelse"
-] @operator
+] @operator.logical
 
 [
   "return"
-] @keyword.return
+] @keyword.control.return
 
 [
   "if"
   "else"
   "switch"
-] @keyword.control
+] @keyword.control.if
 
 [
   "for"
   "while"
   "break"
   "continue"
-] @keyword
+] @keyword.control
 
 [
   "usingnamespace"
-] @constant
+] @constant.builtin
 
 [
   "try"
   "catch"
-] @keyword
+] @keyword.control
 
 [
   "anytype"
   "anyframe"
   (BuildinTypeExpr)
-] @type
+] @type.builtin
 
 [
   "const"
@@ -177,7 +177,7 @@ field_constant: (IDENTIFIER) @constant
   "align"
   "callconv"
   "linksection"
-] @keyword.storage
+] @keyword.special
 
 [
   "comptime"
@@ -194,7 +194,7 @@ field_constant: (IDENTIFIER) @constant
   "null"
   "unreachable"
   "undefined"
-] @constant
+] @constant.builtin
 
 [
   (CompareOp)
