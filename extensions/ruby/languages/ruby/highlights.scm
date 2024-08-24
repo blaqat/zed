@@ -40,8 +40,11 @@
 "defined?" @function.builtin
 
 (call
-  method: [(identifier) (constant)] @function.method)
+	method: [(identifier) (constant)] @function)
 
+(call
+	receiver: (identifier)
+  method: [(identifier) (constant)] @function.method)
 ; Function definitions
 
 (alias (identifier) @function.method)
