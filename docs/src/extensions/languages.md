@@ -95,6 +95,7 @@ This query marks strings, object keys, and numbers for highlighting. The followi
 | @comment                 | Captures comments                      |
 | @comment.doc             | Captures documentation comments        |
 | @constant                | Captures constants                     |
+| @constant.builtin        | Captures built-in constants            |
 | @constructor             | Captures constructors                  |
 | @embedded                | Captures embedded content              |
 | @emphasis                | Captures emphasized text               |
@@ -103,17 +104,24 @@ This query marks strings, object keys, and numbers for highlighting. The followi
 | @function                | Captures functions                     |
 | @hint                    | Captures hints                         |
 | @keyword                 | Captures keywords                      |
+| @keyword.control         | Captures control keywords 							|
 | @label                   | Captures labels                        |
 | @link_text               | Captures link text                     |
 | @link_uri                | Captures link URIs                     |
 | @number                  | Captures numeric values                |
 | @operator                | Captures operators                     |
+| @operator.arithmetic     | Captures math operators                |
+| @operator.assignment     | Captures assignment operators          |
+| @operator.bitwise        | Captures bitwise operators             |
+| @operator.comparison     | Captures comparison operators          |
+| @operator.logical				 | Captures logic operators               |
 | @predictive              | Captures predictive text               |
 | @preproc                 | Captures preprocessor directives       |
 | @primary                 | Captures primary elements              |
 | @property                | Captures properties                    |
 | @punctuation             | Captures punctuation                   |
 | @punctuation.bracket     | Captures brackets                      |
+| @punctuation.bracket.tag | Captures arrow brackets                |
 | @punctuation.delimiter   | Captures delimiters                    |
 | @punctuation.list_marker | Captures list markers                  |
 | @punctuation.special     | Captures special punctuation           |
@@ -126,7 +134,11 @@ This query marks strings, object keys, and numbers for highlighting. The followi
 | @text.literal            | Captures literal text                  |
 | @title                   | Captures titles                        |
 | @type                    | Captures types                         |
+| @type.builtin            | Captures built-in types                |
+| @type.builtin.primitive  | Captures primitive types               |
 | @variable                | Captures variables                     |
+| @variable.builtin        | Captures built-in namespaces           |
+| @variable.parameter      | Captures function parameters 					|
 | @variable.special        | Captures special variables             |
 | @variant                 | Captures variants                      |
 
