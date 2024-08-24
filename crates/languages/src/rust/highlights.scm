@@ -33,8 +33,8 @@
   ])
 
 
-(function_item name: (identifier) @function.definition)
-(function_signature_item name: (identifier) @function.definition)
+(function_item name: (identifier) @function.declaration)
+(function_signature_item name: (identifier) @function.declaration)
 
 (macro_invocation
   macro: [

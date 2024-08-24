@@ -63,7 +63,7 @@
 [
   (ivar_name)
   (cvar_name)
-] @variable.member
+] @property
 
 (alias_member
   (method_name) @function)

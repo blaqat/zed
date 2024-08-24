@@ -25,7 +25,7 @@
 
 (type_annotation(lower_case_identifier) @function)
 (port_annotation(lower_case_identifier) @function)
-(function_declaration_left(lower_case_identifier) @function.definition)
+(function_declaration_left(lower_case_identifier) @function.declaraion)
 
 (function_call_expr
     target: (value_expr

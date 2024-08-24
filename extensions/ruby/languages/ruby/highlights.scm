@@ -1,13 +1,10 @@
+(identifier) @variable
 ; Keywords
 
 [
-  "alias"
-  "and"
   "begin"
   "break"
   "case"
-  "class"
-  "def"
   "do"
   "else"
   "elsif"
@@ -16,9 +13,7 @@
   "for"
   "if"
   "in"
-  "module"
   "next"
-  "or"
   "rescue"
   "retry"
   "return"
@@ -28,17 +23,21 @@
   "when"
   "while"
   "yield"
+] @keyword.control
+
+[
+  "alias"
+  "class"
+  "def"
+  "module"
 ] @keyword
+
 
 ((identifier) @keyword
  (#match? @keyword "^(private|protected|public)$"))
 
 ; Function calls
-
-((identifier) @function.method.builtin
- (#eq? @function.method.builtin "require"))
-
-"defined?" @function.method.builtin
+"defined?" @function.builtin
 
 (call
   method: [(identifier) (constant)] @function.method)
@@ -47,8 +46,8 @@
 
 (alias (identifier) @function.method)
 (setter (identifier) @function.method)
-(method name: [(identifier) (constant)] @function.method)
-(singleton_method name: [(identifier) (constant)] @function.method)
+(method name: [(identifier) (constant)] @function.declaration)
+(singleton_method name: [(identifier) (constant)] @function.declaration)
 (method_parameters [
   (identifier) @variable.parameter
   (optional_parameter name: (identifier) @variable.parameter)
@@ -61,6 +60,11 @@
 
 ((identifier) @constant.builtin
  (#match? @constant.builtin "^__(FILE|LINE|ENCODING)__$"))
+
+((identifier) @function.builtin
+  (#any-of?
+   @function.builtin
+   "puts" "print" "p" "gets" "chomp" "require" "load" "exit" "sleep" "rand" "srand" "proc"))
 
 (file) @constant.builtin
 (line) @constant.builtin
@@ -78,24 +82,47 @@
  (#match? @constant "^[A-Z\\d_]+$"))
 
 (superclass
-  (constant) @type.super)
+  (constant) @variable.special)
 
 (superclass
   (scope_resolution
-    (constant) @type.super))
+    (constant) @variable.special))
 
 (superclass
   (scope_resolution
     (scope_resolution
-      (constant) @type.super)))
+      (constant) @variable.special)))
 
 (self) @variable.special
 (super) @variable.special
 
+((constant) @type.builtin
+  (#any-of?
+   @type.builtin
+   "Array"
+   "Hash"
+   "Regexp"
+   "Range"
+   "Time"
+   "Struct"
+   "Module"
+   "Class"))
+
+((constant) @type.builtin.primitive
+  (#any-of?
+   @type.builtin.primitive
+   "Integer"
+   "Float"
+   "String"
+   "Symbol"
+   "TrueClass"
+   "FalseClass"
+   "NilClass"))
+
 [
   (class_variable)
   (instance_variable)
-] @variable.member
+] @property
 
 
 ; Literals
@@ -116,7 +143,7 @@
 ] @string.special.symbol
 
 (regex) @string.regex
-(escape_sequence) @escape
+(escape_sequence) @string.escape
 
 [
   (integer)
@@ -124,10 +151,11 @@
 ] @number
 
 [
-  (nil)
   (true)
   (false)
-] @constant.builtin
+] @boolean
+
+(nil) @constant.builtin
 
 (comment) @comment
 
@@ -135,31 +163,22 @@
 
 [
   "!"
-  "~"
-  "+"
-  "-"
-  "**"
-  "*"
-  "/"
-  "%"
-  "<<"
-  ">>"
+  "||"
+  "&&"
+  "and"
+  "or"
+] @operator.logical
+
+[
   "&"
   "|"
   "^"
-  ">"
-  "<"
-  "<="
-  ">="
-  "=="
-  "!="
-  "=~"
-  "!~"
-  "<=>"
-  "||"
-  "&&"
-  ".."
-  "..."
+  "~"
+  "<<"
+  ">>"
+] @operator.bitwise
+
+[
   "="
   "**="
   "*="
@@ -174,6 +193,32 @@
   "||="
   "|="
   "^="
+] @operator.assignment
+
+[
+  "+"
+  "-"
+  "**"
+  "*"
+  "/"
+  "%"
+] @operator.arithmetic
+
+[
+  ">"
+  "<"
+  "<="
+  ">="
+  "=="
+  "!="
+  "=~"
+  "!~"
+  "<=>"
+] @operator.comparison
+
+[
+  ".."
+  "..."
   "=>"
   "->"
   (operator)

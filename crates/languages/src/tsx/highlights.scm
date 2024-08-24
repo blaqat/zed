@@ -70,9 +70,9 @@
 
 ; Builtin Namespaces
 
-((identifier) @variable.special
+((identifier) @variable.builtin
 	(#match?
-   @variable.special
+   @variable.builtin
    "^(console|window|document|arguments|process)$"))
 
 ([

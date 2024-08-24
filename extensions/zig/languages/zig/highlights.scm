@@ -14,7 +14,7 @@
 ] @variable
 
 ;; func parameter
-parameter: (IDENTIFIER) @property
+parameter: (IDENTIFIER) @variable.parameter
 
 [
   field_member: (IDENTIFIER)
@@ -50,10 +50,12 @@ parameter: (IDENTIFIER) @property
   (#match? @constant "^[A-Z][A-Z_0-9]+$")
 )
 
-[
-  function_call: (IDENTIFIER)
-  function: (IDENTIFIER)
-] @function
+(VarDecl
+	"const"
+	variable_type_function: (IDENTIFIER) @constant)
+
+function_call: (IDENTIFIER) @function
+function: (IDENTIFIER) @function.declaration
 
 exception: "!" @keyword
 
@@ -151,7 +153,7 @@ field_constant: (IDENTIFIER) @constant
 
 [
   "usingnamespace"
-] @constant.builtin
+] @keyword
 
 [
   "try"
@@ -161,8 +163,11 @@ field_constant: (IDENTIFIER) @constant
 [
   "anytype"
   "anyframe"
-  (BuildinTypeExpr)
 ] @type.builtin
+
+(BuildinTypeExpr) @type.builtin.primitive
+; ((BuildinTypeExpr) @type.builtin.primitive
+; 	(#any-of? @type.builtin.primitive "bool" "i8" "i16" "i32" "i64" "u8" "u16" "u32" "u64" "f32" "f64" "c64" "c128" "void" "noreturn" "type" "comptime_int" "comptime_float" "comptime_str" "comptime_bool" "isize" "usize" "type"))
 
 [
   "const"

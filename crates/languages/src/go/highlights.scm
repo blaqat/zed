@@ -1,6 +1,6 @@
 (identifier) @variable
 (type_identifier) @type
-(field_identifier) @variable.member
+(field_identifier) @property
 (package_identifier) @variable.special
 (parameter_declaration (identifier) @variable.parameter)
 (variadic_parameter_declaration (identifier) @variable.parameter)
@@ -11,10 +11,8 @@
 ((type_identifier) @type.builtin
 	(#match? @type.builtin "^(error|chan|any)$"))
 
-((identifier) @variable.special
-	(#match? @variable.special "^(fmt|errors|io|os|http|json|time|math|strings|sync|net|http|bufio|bytes|flag|log|regexp|sort|strconv|testing|text|unicode|context|reflect|crypto|image|mime|path|runtime|signal|syscall|template)$"))
-
-
+((identifier) @variable.builtin
+	(#match? @variable.builtin "^(fmt|errors|io|os|http|json|time|math|strings|sync|net|http|bufio|bytes|flag|log|regexp|sort|strconv|testing|text|unicode|context|reflect|crypto|image|mime|path|runtime|signal|syscall|template)$"))
 
 (_
 	receiver: (_ (parameter_declaration
@@ -23,7 +21,7 @@
 (keyed_element
   .
   (literal_element
-    (identifier) @variable.member))
+    (identifier) @property))
 
 (call_expression
   function: (identifier) @function)

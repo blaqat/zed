@@ -1,6 +1,6 @@
 ;; Methods
-(method_declaration name: (identifier) @function)
-(local_function_statement name: (identifier) @function)
+(method_declaration name: (identifier) @function.declaration)
+(local_function_statement name: (identifier) @function.declaration)
 
 ;; Types
 (interface_declaration name: (identifier) @type)
@@ -14,10 +14,8 @@
 (constructor_declaration name: (identifier) @constructor)
 (destructor_declaration name: (identifier) @constructor)
 
-[
-  (implicit_type)
-  (predefined_type)
-] @type.builtin
+(implicit_type) @type.builtin
+(predefined_type) @type.builtin.primitive
 
 (_ type: (identifier) @type)
 
@@ -42,10 +40,8 @@
   "$@\""
  ] @string
 
-[
-  (boolean_literal)
-  (null_literal)
-] @constant
+(boolean_literal) @boolean
+(null_literal) @constant.builtin
 
 ;; Comments
 (comment) @comment
@@ -58,45 +54,60 @@
 ] @punctuation.delimiter
 
 [
-  "--"
-  "-"
-  "-="
+  "&&"
+  "||"
+  "!"
+  "?"
+  "??"
+  "??="
+] @operator.logical
+
+[
   "&"
   "&="
-  "&&"
-  "+"
-  "++"
-  "+="
-  "<"
-  "<="
+  "|"
+  "|="
+  "^"
+  "^="
+  "~"
   "<<"
   "<<="
-  "="
-  "=="
-  "!"
-  "!="
-  "=>"
-  ">"
-  ">="
   ">>"
   ">>="
   ">>>"
   ">>>="
-  "|"
-  "|="
-  "||"
-  "?"
-  "??"
-  "??="
-  "^"
-  "^="
-  "~"
-  "*"
+] @operator.bitwise
+
+[
+  "="
+  "--"
+  "++"
+  "-="
+  "+="
   "*="
-  "/"
   "/="
-  "%"
   "%="
+] @operator.assignment
+
+[
+  "-"
+  "+"
+  "*"
+  "/"
+  "%"
+] @operator.arithmetic
+
+[
+  "<"
+  "<="
+  "=="
+  "!="
+  ">"
+  ">="
+] @operator.comparison
+
+[
+  "=>"
   ":"
 ] @operator
 
@@ -115,58 +126,61 @@
 (escape_sequence) @keyword
 
 [
-  "add"
-  "alias"
-  "as"
-  "base"
   "break"
   "case"
   "catch"
   "checked"
-  "class"
   "continue"
   "default"
-  "delegate"
   "do"
   "else"
+  "finally"
+  "for"
+  "foreach"
+  "goto"
+  "if"
+  "lock"
+  "return"
+  "switch"
+  "throw"
+  "try"
+  "unchecked"
+  "while"
+  "await"
+  "yield"
+  "when"
+] @keyword.control
+
+[
+  "add"
+  "alias"
+  "as"
+  "base"
+  "class"
+  "delegate"
   "enum"
   "event"
   "explicit"
   "extern"
-  "finally"
-  "for"
-  "foreach"
   "global"
-  "goto"
-  "if"
   "implicit"
   "interface"
   "is"
-  "lock"
   "namespace"
   "notnull"
   "operator"
   "params"
-  "return"
   "remove"
   "sizeof"
   "stackalloc"
   "static"
   "struct"
-  "switch"
-  "throw"
-  "try"
   "typeof"
-  "unchecked"
   "using"
-  "while"
   "new"
-  "await"
   "in"
-  "yield"
   "get"
   "set"
-  "when"
   "out"
   "ref"
   "from"
@@ -177,7 +191,6 @@
   "with"
   "let"
 ] @keyword
-
 
 ;; Linq
 (from_clause (identifier) @variable)
@@ -220,8 +233,8 @@
 
 ;; Parameter
 (parameter
-  name: (identifier) @variable)
-(parameter (identifier) @variable)
+  name: (identifier) @variable.parameter)
+(parameter (identifier) @variable.parameter)
 (parameter_modifier) @keyword
 
 ;; Variable declarations
@@ -249,6 +262,11 @@
 
 ;; Lock statement
 (lock_statement (identifier) @variable)
+
+;; Builtins
+((identifier) @variable.builtin
+	(#any-of? @variable.builtin
+		"Console" "Math" "File" "Directory" "Environment"))
 
 ;; Method calls
 (invocation_expression (member_access_expression name: (identifier) @function))

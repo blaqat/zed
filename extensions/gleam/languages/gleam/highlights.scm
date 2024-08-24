@@ -28,7 +28,7 @@
 (unqualified_import "type" (type_identifier) @type)
 (unqualified_import (type_identifier) @constructor)
 (function
-  name: (identifier) @function)
+  name: (identifier) @function.declaration)
 (external_function
   name: (identifier) @function)
 (function_parameter
@@ -61,7 +61,15 @@
 (type_identifier) @type
 
 ; Data constructors
-(constructor_name) @constructor
+(constructor_name) @type
+((constructor_name) @boolean
+ (#any-of? @boolean "True" "False"))
+((constructor_name) @constant.builtin
+ (#any-of? @constant.builtin "Nil" "Nothing" "Ok" "Error"))
+((constructor_name) @type.builtin.primitive
+ (#any-of? @type.builtin.primitive "Int" "Float" "Char" "String" "Bool" "Atom"))
+((constructor_name) @type.builtin
+ (#any-of? @type.builtin "List" "Maybe" "Result" "Tuple" "Option" "Set" "Map" "BitArray"))
 
 ; Literals
 (string) @string
@@ -81,16 +89,19 @@
 
 ; Keywords
 [
+  "assert"
+  "case"
+  "if"
+] @keyword.control
+
+[
   (visibility_modifier) ; "pub"
   (opacity_modifier) ; "opaque"
   "as"
-  "assert"
-  "case"
   "const"
   ; DEPRECATED: 'external' was removed in v0.30.
   "external"
   "fn"
-  "if"
   "import"
   "let"
   "panic"
@@ -102,8 +113,42 @@
 ; Operators
 (binary_expression
   operator: _ @operator)
-(boolean_negation "!" @operator)
-(integer_negation "-" @operator)
+(boolean_negation "!" @operator.logical)
+(integer_negation "-" @operator.arithmetic)
+[
+  "&&"
+  "||"
+] @operator.logical
+
+[
+  "="
+  "<-"
+] @operator.assignment
+
+[
+  "+"
+  "-"
+  "*"
+  "/"
+  "%"
+] @operator.arithmetic
+
+[
+  "=="
+  "!="
+  ">"
+  "<"
+  ">="
+  "<="
+] @operator.comparison
+
+[
+  "->"
+  ".."
+  "<>"
+  "|>"
+  ":"
+] @operator
 
 ; Punctuation
 [
