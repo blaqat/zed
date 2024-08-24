@@ -29,6 +29,9 @@
 (call_expression (identifier) @function.builtin
 	(#match? @function.builtin "^(make|append|copy|delete|len|cap|new|complex|real|imag|close|panic|recover|print|println)$"))
 
+((identifier) @type.builtin.primitive
+	(#match? @type.builtin.primitive "^(bool|byte|complex(64|128)|float(32|64)|int(8|16|32|64|)?|uint(8|16|32|64)?|rune|string|uintptr)$"))
+
 (call_expression
   function: (selector_expression
     field: (field_identifier) @function.method))

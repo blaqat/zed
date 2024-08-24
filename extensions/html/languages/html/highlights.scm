@@ -13,4 +13,4 @@
   "<!"
   "</"
   "/>"
-] @punctuation.bracket
+] @punctuation.bracket.tag

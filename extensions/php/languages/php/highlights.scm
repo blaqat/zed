@@ -3,7 +3,7 @@
 
 ; Types
 
-(primitive_type) @type.builtin
+(primitive_type) @type.builtin.primitive
 (cast_type) @type.builtin
 (named_type (name) @type) @type
 (named_type (qualified_name) @type) @type
@@ -50,10 +50,11 @@
 ((name) @constructor
  (#match? @constructor "^[A-Z]"))
 
-((name) @variable.builtin
- (#eq? @variable.builtin "this"))
+((name) @variable.special
+ (#eq? @variable.special "this"))
 
 (variable_name) @variable
+(simple_parameter (variable_name) @variable.parameter)
 
 ; Basic tokens
 [
@@ -64,62 +65,103 @@
   (heredoc_body)
   (nowdoc_body)
 ] @string
-(boolean) @constant.builtin
+(boolean) @boolean
 (null) @constant.builtin
 (integer) @number
 (float) @number
 (comment) @comment
 
-"$" @operator
+; Operators
+[
+  "&&" "||" "!" "and" "or" "xor"
+] @operator.logical
+
+[
+  "&" "|" "^" "~" "<<" ">>"
+] @operator.bitwise
+
+[
+  "=" "+=" "-=" "*=" "/=" "%=" "**=" ".=" "++" "--"
+] @operator.assignment
+
+[
+  "+" "-" "*" "/" "%" "**"
+] @operator.arithmetic
+
+[
+  "==" "!=" "===" "!==" ">" "<" ">=" "<=" "<=>"
+] @operator.comparison
+
+[
+  "$" "instanceof" "@" "->" "=>" "??" "?" ":" "..."
+] @operator
+
+; Punctuation
+[
+	"{" "}" "(" ")" "[" "]"
+] @punctuation.bracket
+
+[
+	"," ";" ":"
+] @punctuation.delimiter
+
+[
+	"." "::"
+] @punctuation
 
 ; Keywords
 
-"abstract" @keyword
-"as" @keyword
-"break" @keyword
-"case" @keyword
-"catch" @keyword
-"class" @keyword
-"const" @keyword
-"continue" @keyword
-"declare" @keyword
-"default" @keyword
-"do" @keyword
-"echo" @keyword
-"else" @keyword
-"elseif" @keyword
-"enum" @keyword
-"enddeclare" @keyword
-"endforeach" @keyword
-"endif" @keyword
-"endswitch" @keyword
-"endwhile" @keyword
-"extends" @keyword
-"final" @keyword
-"readonly" @keyword
-"finally" @keyword
-"foreach" @keyword
-"function" @keyword
-"global" @keyword
-"if" @keyword
-"implements" @keyword
-"include_once" @keyword
-"include" @keyword
-"insteadof" @keyword
-"interface" @keyword
-"namespace" @keyword
-"new" @keyword
-"private" @keyword
-"protected" @keyword
-"public" @keyword
-"require_once" @keyword
-"require" @keyword
-"return" @keyword
-"static" @keyword
-"switch" @keyword
-"throw" @keyword
-"trait" @keyword
-"try" @keyword
-"use" @keyword
-"while" @keyword
-"yield" @keyword
+[
+  "abstract"
+  "as"
+  "class"
+  "const"
+  "declare"
+  "echo"
+  "enum"
+  "extends"
+  "final"
+  "function"
+  "global"
+  "implements"
+  "include"
+  "include_once"
+  "insteadof"
+  "interface"
+  "namespace"
+  "new"
+  "private"
+  "protected"
+  "public"
+  "readonly"
+  "require"
+  "require_once"
+  "static"
+  "trait"
+  "use"
+  "yield"
+] @keyword
+
+[
+  "break"
+  "case"
+  "catch"
+  "continue"
+  "default"
+  "do"
+  "else"
+  "elseif"
+  "enddeclare"
+  "endforeach"
+  "endif"
+  "endswitch"
+  "endwhile"
+  "finally"
+  "foreach"
+  "if"
+  "return"
+  "switch"
+  "throw"
+  "try"
+  "while"
+] @keyword.control
