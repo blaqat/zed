@@ -1,3 +1,4 @@
+
 (php_tag) @tag
 "?>" @tag
 
@@ -93,7 +94,7 @@
 ] @operator.comparison
 
 [
-  "$" "instanceof" "@" "->" "=>" "??" "?" ":" "..."
+  "$" "instanceof" "@" "->" "=>" "??" "?" ":" "..."  ":"
 ] @operator
 
 ; Punctuation
@@ -102,7 +103,7 @@
 ] @punctuation.bracket
 
 [
-	"," ";" ":"
+	"," ";"
 ] @punctuation.delimiter
 
 [
@@ -115,6 +116,7 @@
   "abstract"
   "as"
   "class"
+  "clone"
   "const"
   "declare"
   "echo"
@@ -122,12 +124,14 @@
   "extends"
   "final"
   "function"
+  "fn"
   "global"
   "implements"
   "include"
   "include_once"
   "insteadof"
   "interface"
+  "match"
   "namespace"
   "new"
   "private"
@@ -157,6 +161,7 @@
   "endswitch"
   "endwhile"
   "finally"
+  "for"
   "foreach"
   "if"
   "return"
