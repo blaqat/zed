@@ -144,6 +144,7 @@
   "trait"
   "use"
   "yield"
+  ; "yield from" (Crashes Extension)
 ] @keyword
 
 [
