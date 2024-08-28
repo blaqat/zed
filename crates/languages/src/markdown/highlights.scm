@@ -7,9 +7,10 @@
   (list_marker_plus)
   (list_marker_minus)
   (list_marker_star)
-  (list_marker_dot)
   (list_marker_parenthesis)
 ] @punctuation.delimiter
+
+(list_marker_dot) @number
 
 (fenced_code_block
   (info_string
