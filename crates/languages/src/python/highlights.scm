@@ -25,7 +25,15 @@
 
 ; Function calls
 
-(decorator) @function
+(decorator
+	"@" @attribute
+	(identifier) @attribute)
+
+(decorator
+"@"
+((identifier) @attribute.builtin
+	(#match? @attribute.builtin "^(enum|property|classmethod|staticmethod|functools.wraps|functools.singledispatch|functools.lru_cache|functools.cmp_to_key|functools.total_ordering|functools.partial|typing.overload|contextlib.contextmanager|dataclasses.dataclass|atexit.register|abc.ABCMeta.register|enum.unique|xmlrpc.register_function|sys.settrace|coroutine|throttle|exceptionCatcher|timeit|async_process|threaded|debug|skip_if_env|lock_or_wait|unittest.mock.patch|wrapt.patch_function_wrapper|trycatch|log_calls|decorator|decorator_args|named_decorator|dec.decorator|log_call|intercept|instead|before|undecorated|click.option|config_decorator.setting|regex_decorator.listen|expose|register|contract|pedantic|trace|dirty|Decorator|mutable|final|auto_obj|to_string|data|repeat|DataAttribute|curried|attrs|arg.validate|main|retry|self|inject)$")
+))
 
 (call
   function: (attribute attribute: (identifier) @function.method))
