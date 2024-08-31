@@ -23,6 +23,21 @@
 	 @function.builtin
 	 "^(eval|require|exports|process|setTimeout|clearTimeout|setInterval|clearInterval|setImmediate|clearImmediate|alert|confirm|prompt|open|close)$"))
 
+; Special identifiers
+
+((identifier) @type
+ (#match? @type "^[A-Z]"))
+(type_identifier) @type
+(predefined_type) @type.builtin
+
+((identifier) @variable.special
+		(#match? @variable.special "^(NaN|Infinity)$"))
+
+(lexical_declaration
+	kind: "const"
+	(variable_declarator
+	  name: (identifier) @constant))
+
 ; Function and method definitions
 
 (function_expression
@@ -49,20 +64,6 @@
   left: (identifier) @function
   right: [(function_expression) (arrow_function)])
 
-; Special identifiers
-
-((identifier) @type
- (#match? @type "^[A-Z]"))
-(type_identifier) @type
-(predefined_type) @type.builtin
-
-((identifier) @variable.special
-		(#match? @variable.special "^(NaN|Infinity)$"))
-
-(lexical_declaration
-	kind: "const"
-	(variable_declarator
-	  name: (identifier) @constant))
 
 ; Builtin Namespaces
 
@@ -233,8 +234,9 @@
   "delete" "void" "with" "of" "new" "get" "set" "target"
   "abstract" "declare" "enum" "implements" "interface" "keyof" "namespace"
   "private" "protected" "public" "readonly" "override" "type"
-  ((identifier) @keyword (#match? @keyword "^(global|module)$"))
 ] @keyword
+
+((identifier) @keyword (#match? @keyword "^(global|module)$"))
 
 ; JSX elements
 

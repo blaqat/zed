@@ -24,6 +24,26 @@
 	 @function.builtin
 	 "^(eval|require|exports|process|setTimeout|clearTimeout|setInterval|clearInterval|setImmediate|clearImmediate|alert|confirm|prompt|open|close)$"))
 
+; Special identifiers
+
+((identifier) @type
+ (#match? @type "^[A-Z]"))
+(type_identifier) @type
+(predefined_type) @type.builtin
+((predefined_type) @type.builtin.primitive
+	(#match?
+	 @type.builtin.primitive
+	 "^(boolean|number|string|object|symbol|any)$"))
+
+
+((identifier) @variable.special
+		(#match? @variable.special "^(NaN|Infinity)$"))
+
+(lexical_declaration
+	kind: "const"
+	(variable_declarator
+	  name: (identifier) @constant))
+
 ; Function and method definitions
 
 (function_expression
@@ -49,26 +69,6 @@
 (assignment_expression
   left: (identifier) @function
   right: [(function_expression) (arrow_function)])
-
-; Special identifiers
-
-((identifier) @type
- (#match? @type "^[A-Z]"))
-(type_identifier) @type
-(predefined_type) @type.builtin
-((predefined_type) @type.builtin.primitive
-	(#match?
-	 @type.builtin.primitive
-	 "^(boolean|number|string|object|symbol|any)$"))
-
-
-((identifier) @variable.special
-		(#match? @variable.special "^(NaN|Infinity)$"))
-
-(lexical_declaration
-	kind: "const"
-	(variable_declarator
-	  name: (identifier) @constant))
 
 ; Builtin Namespaces
 
@@ -242,5 +242,6 @@
 [
   "satisfies" "declare" "override"
   "delete" "void" "of" "new" "get" "set" "target" "as" "with"
-  ((identifier) @keyword (#match? @keyword "^(global|module)$"))
 ] @keyword
+
+((identifier) @keyword (#match? @keyword "^(global|module)$"))
