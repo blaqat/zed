@@ -242,3 +242,8 @@
 	"#" @attribute
 	(attribute
 		(identifier) @attribute))
+    
+(parameter (identifier) @variable.parameter)
+
+(attribute_item) @attribute
+(inner_attribute_item) @attribute
