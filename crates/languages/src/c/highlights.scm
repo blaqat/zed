@@ -1,41 +1,33 @@
+"typedef" @keyword
+
 [
-  "const"
-  "enum"
-  "extern"
-  "inline"
+  "const" "static" "volatile" "extern" "inline"
+] @keyword.modifier
+
+[
+  "struct" "enum" "union"
+] @keyword.typedef
+
+[
   "sizeof"
-  "static"
-  "struct"
-  "typedef"
-  "union"
-  "volatile"
-] @keyword
+] @keyword.operator
 
 [
-  "break"
-  "case"
-  "continue"
-  "default"
-  "do"
-  "else"
-  "for"
-  "if"
-  "return"
-  "switch"
-  "while"
-] @keyword.control
+  "break" "continue" "return"
+] @keyword.return
 
 [
-  "#define"
-  "#elif"
-  "#else"
-  "#endif"
-  "#if"
-  "#ifdef"
-  "#ifndef"
-  "#include"
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "while" "do"
+] @keyword.repeat
+
+[
+  "#define" "#elif" "#else" "#endif" "#if" "#ifdef" "#ifndef" "#include"
   (preproc_directive)
-] @keyword.special
+] @keyword.directive
 
 [
   "&&"

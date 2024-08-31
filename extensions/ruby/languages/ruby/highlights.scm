@@ -2,39 +2,67 @@
 ; Keywords
 
 [
-  "begin"
-  "break"
-  "case"
-  "do"
-  "else"
-  "elsif"
-  "end"
-  "ensure"
-  "for"
-  "if"
-  "in"
-  "next"
-  "rescue"
-  "retry"
-  "return"
-  "then"
-  "unless"
-  "until"
-  "when"
-  "while"
-  "yield"
-] @keyword.control
+   "alias"
+] @keyword.modifier
 
 [
-  "alias"
-  "class"
+  "class" "module"
+] @keyword.typedef
+
+[
   "def"
-  "module"
+] @keyword.function
+
+[
+  "return" "next" "break" "retry" "yield"
+] @keyword.return
+
+[
+  "if" "else" "elsif" "unless" "case" "when"
+] @keyword.conditional
+
+[
+  "for" "while" "until"
+] @keyword.repeat
+
+[
+  "rescue" "ensure"
+] @keyword.exception
+
+[
+  "in"
+] @keyword.operator
+
+[
+  "begin" "then" "do" "end"
 ] @keyword
 
+((identifier) @keyword.modifier
+ (#match? @keyword.modifier "^(private|protected|public)$"))
 
-((identifier) @keyword
- (#match? @keyword "^(private|protected|public)$"))
+(class
+	"end" @keyword.typedef)
+
+(method
+	"end" @keyword.function)
+
+(if
+	"end" @keyword.conditional)
+
+(unless
+	"end" @keyword.conditional)
+
+(while
+	(do
+		"end" @keyword.repeat))
+
+(for
+	(do
+		"end" @keyword.repeat))
+
+(until
+	(do
+		"end" @keyword.repeat))
 
 ; Function calls
 "defined?" @function.builtin

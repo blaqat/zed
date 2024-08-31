@@ -5,8 +5,7 @@
 (self) @variable.special
 (field_identifier) @property
 
-(parameter
-	pattern: (identifier) @variable.parameter)
+(parameter (identifier) @variable.parameter)
 
 (trait_item name: (type_identifier) @type.interface)
 (impl_item trait: (type_identifier) @type.interface)
@@ -109,47 +108,40 @@
 ] @punctuation.special
 
 [
-  "as"
-  "const"
-  "default"
-  "dyn"
-  "enum"
-  "extern"
-  "fn"
-  "impl"
-  "in"
-  "let"
-  "macro_rules!"
-  "mod"
-  "move"
-  "pub"
-  "ref"
-  "static"
-  "struct"
-  "trait"
-  "type"
-  "union"
-  "use"
-  "where"
-  (crate)
-  (mutable_specifier)
-  (super)
-] @keyword
+  "const" "static" "ref" "move" "pub" "unsafe" "async" "await" (mutable_specifier)
+] @keyword.modifier
 
 [
-  "await"
-  "break"
-  "continue"
-  "else"
-  "for"
-  "if"
-  "loop"
-  "match"
-  "return"
-  "unsafe"
-  "while"
-  "yield"
-] @keyword.control
+  "enum" "struct" "trait" "type" "union" "impl" "dyn"
+] @keyword.typedef
+
+[
+  "fn"
+] @keyword.function
+
+[
+  "use" "mod" "extern" (crate)
+] @keyword.import
+
+[
+  "return" "yield" "break" "continue"
+] @keyword.return
+
+[
+  "if" "else" "match"
+] @keyword.conditional
+
+[
+  "for" "loop" "while"
+] @keyword.repeat
+
+[
+  "where" "in" "as"
+] @keyword.operator
+
+[
+  "let" "default" "macro_rules!" (super)
+] @keyword
 
 [
   (string_literal)
@@ -242,8 +234,3 @@
 	"#" @attribute
 	(attribute
 		(identifier) @attribute))
-    
-(parameter (identifier) @variable.parameter)
-
-(attribute_item) @attribute
-(inner_attribute_item) @attribute

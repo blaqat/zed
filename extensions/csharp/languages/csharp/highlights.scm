@@ -121,75 +121,47 @@
 ]  @punctuation.bracket
 
 ;; Keywords
-(modifier) @keyword
-(this_expression) @keyword
-(escape_sequence) @keyword
+[
+  (modifier) "static" "readonly" "const" "extern" "volatile" "fixed" "stackalloc"
+  "implicit" "explicit" "operator" "checked" "unchecked" "lock"
+] @keyword.modifier
 
 [
-  "break"
-  "case"
-  "catch"
-  "checked"
-  "continue"
-  "default"
-  "do"
-  "else"
-  "finally"
-  "for"
-  "foreach"
-  "goto"
-  "if"
-  "lock"
-  "return"
-  "switch"
-  "throw"
-  "try"
-  "unchecked"
-  "while"
+  "class" "struct" "enum" "interface" "delegate" "event" "namespace"
+] @keyword.typedef
+
+[
+  "new" "sizeof" "typeof" "is" "as"
+] @keyword.operator
+
+[
+  "using" "extern"
+] @keyword.import
+
+[
+  "return" "yield" "break" "continue" "goto"
+] @keyword.return
+
+[
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "foreach" "while" "do"
+] @keyword.repeat
+
+[
+  "try" "catch" "finally" "throw"
+] @keyword.exception
+
+[
   "await"
-  "yield"
-  "when"
-] @keyword.control
+] @keyword.coroutine
 
 [
-  "add"
-  "alias"
-  "as"
-  "base"
-  "class"
-  "delegate"
-  "enum"
-  "event"
-  "explicit"
-  "extern"
-  "global"
-  "implicit"
-  "interface"
-  "is"
-  "namespace"
-  "notnull"
-  "operator"
-  "params"
-  "remove"
-  "sizeof"
-  "stackalloc"
-  "static"
-  "struct"
-  "typeof"
-  "using"
-  "new"
-  "in"
-  "get"
-  "set"
-  "out"
-  "ref"
-  "from"
-  "where"
-  "select"
-  "record"
-  "init"
-  "with"
-  "let"
+  (this_expression) (escape_sequence)
+  "base" "params" "ref" "out" "in" "global" "alias" "add" "remove"
+  "from" "where" "select" "get" "set" "init" "with" "when" "let"
 ] @keyword
 
 ;; Linq

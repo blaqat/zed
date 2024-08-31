@@ -194,68 +194,46 @@
 
 ; Keywords
 [
-  "as"
-  "await"
-  "class"
-  "const"
-  "delete"
-  "export"
-  "extends"
-  "from"
-  "function"
-  "get"
-  "import"
-  "in"
-  "instanceof"
-  "let"
-  "new"
-  "of"
-  "set"
-  "static"
-  "target"
-  "typeof"
-  "var"
-  "void"
-  "yield"
-] @keyword
+  "const" "let" "var" "static" "async" "await"
+] @keyword.modifier
 
 [
-	"async"
-  "break"
-  "case"
-  "catch"
-  "continue"
-  "debugger"
-  "default"
-  "do"
-  "else"
-  "finally"
-  "for"
-  "if"
-  "return"
-  "switch"
-  "throw"
-  "try"
-  "while"
-  "with"
-] @keyword.control
+  "class" "extends" "instanceof" "typeof" "in"
+] @keyword.typedef
 
-[ "abstract"
-  "declare"
-  "enum"
-  "export"
-  "implements"
-  "interface"
-  "keyof"
-  "namespace"
-  "private"
-  "protected"
-  "public"
-  "type"
-  "readonly"
-  "override"
-  ((identifier) @keyword
-		(#match? @keyword "^(global|module)$"))
+[
+  "function"
+] @keyword.function
+
+[
+  "import" "export" "from"
+] @keyword.import
+
+[
+  "break" "continue" "return" "yield"
+] @keyword.return
+
+[
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "while" "do"
+] @keyword.repeat
+
+[
+  "try" "catch" "finally" "throw"
+] @keyword.exception
+
+[
+  "debugger"
+] @keyword.debug
+
+[
+  "delete" "void" "with" "of" "new" "get" "set" "target"
+  "abstract" "declare" "enum" "implements" "interface" "keyof" "namespace"
+  "private" "protected" "public" "readonly" "override" "type"
+  ((identifier) @keyword (#match? @keyword "^(global|module)$"))
 ] @keyword
 
 ; JSX elements

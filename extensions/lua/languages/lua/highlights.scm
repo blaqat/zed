@@ -1,17 +1,12 @@
 ;; Keywords
 
-"return" @keyword
+"goto" @keyword
+"local" @keyword.modifier
+"in" @keyword.operator
 
 [
-	"goto"
-] @keyword.control
-
-[
- "in"
- "local"
-] @keyword
-
-(break_statement) @keyword.control
+	"return" (break_statement)
+] @keyword.return
 
 (do_statement
 [
@@ -24,13 +19,13 @@
   "while"
   "do"
   "end"
-] @keyword.control)
+] @keyword.repeat)
 
 (repeat_statement
 [
   "repeat"
   "until"
-] @keyword.control)
+] @keyword.repeat)
 
 (if_statement
 [
@@ -39,39 +34,39 @@
   "else"
   "then"
   "end"
-] @keyword.control)
+] @keyword.conditional)
 
 (elseif_statement
 [
   "elseif"
   "then"
   "end"
-] @keyword.control)
+] @keyword.conditional)
 
 (else_statement
 [
   "else"
   "end"
-] @keyword.control)
+] @keyword.conditional)
 
 (for_statement
 [
   "for"
   "do"
   "end"
-] @keyword.control)
+] @keyword.repeat)
 
 (function_declaration
 [
   "function"
   "end"
-] @keyword)
+] @keyword.function)
 
 (function_definition
 [
   "function"
   "end"
-] @keyword)
+] @keyword.function)
 
 ;; Operators
 

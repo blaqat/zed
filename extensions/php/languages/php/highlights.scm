@@ -113,61 +113,42 @@
 ; Keywords
 
 [
-  "abstract"
-  "as"
-  "class"
-  "clone"
-  "const"
-  "declare"
-  "echo"
-  "enum"
-  "extends"
-  "final"
-  "function"
-  "fn"
-  "global"
-  "implements"
-  "include"
-  "include_once"
-  "insteadof"
-  "interface"
-  "match"
-  "namespace"
-  "new"
-  "private"
-  "protected"
-  "public"
-  "readonly"
-  "require"
-  "require_once"
-  "static"
-  "trait"
-  "use"
-  "yield"
-  ; "yield from" (Crashes Extension)
-] @keyword
+  "abstract" "final" "private" "protected" "public" "readonly" "static" "global"
+] @keyword.modifier
 
 [
-  "break"
-  "case"
-  "catch"
-  "continue"
-  "default"
-  "do"
-  "else"
-  "elseif"
-  "enddeclare"
-  "endforeach"
-  "endif"
-  "endswitch"
-  "endwhile"
-  "finally"
-  "for"
-  "foreach"
-  "if"
-  "return"
-  "switch"
-  "throw"
-  "try"
-  "while"
-] @keyword.control
+  "class" "trait" "enum" "interface" "implements" "extends" "namespace"
+] @keyword.typedef
+
+[
+  "function" "fn"
+] @keyword.function
+
+[
+  "use" "namespace" "include" "include_once" "require" "require_once"
+] @keyword.import
+
+[
+  "return" "yield" "break" "continue"
+] @keyword.return
+
+[
+  "if" "else" "elseif" "switch" "case" "default" "match"
+] @keyword.conditional
+
+[
+  "for" "foreach" "while" "do"
+] @keyword.repeat
+
+[
+  "try" "catch" "finally" "throw"
+] @keyword.exception
+
+[
+  "clone" "new" "insteadof" "instanceof"
+] @keyword.operator
+
+[
+  "declare" "echo" "enddeclare" "endforeach" "endif" "endswitch" "endwhile"
+  "as" "const"
+] @keyword

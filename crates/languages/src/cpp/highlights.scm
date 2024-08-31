@@ -50,72 +50,50 @@
 ("static_assert") @function.builtin
 
 [
-  "alignas"
-  "alignof"
-  "class"
-  "concept"
-  "constexpr"
-  "decltype"
-  "delete"
-  "enum"
-  "explicit"
-  "extern"
-  "final"
-  "friend"
-  "inline"
-  "namespace"
-  "new"
-  "noexcept"
-  "override"
-  "private"
-  "protected"
-  "public"
-  "requires"
-  "sizeof"
-  "struct"
-  "template"
-  "typedef"
-  "typename"
-  "union"
+  "alignas" "alignof" "constexpr" "explicit" "final" "friend" "inline" "mutable"
+  "noexcept" "override" "private" "protected" "public"
+] @keyword.modifier
+
+[
+  "class" "struct" "union" "enum" "typename" "template" "namespace"
+] @keyword.typedef
+
+[
+  "new" "delete" "sizeof"
+] @keyword.operator
+
+[
   "using"
-  "primitive_type"
-  "sized_type_specifier"
-  "storage_class_specifier"
-  "type_qualifier"
-  "virtual"
-] @keyword
+] @keyword.import
 
 [
-  "break"
-  "case"
-  "catch"
-  "co_await"
-  "co_return"
-  "co_yield"
-  "continue"
-  "default"
-  "do"
-  "else"
-  "for"
-  "if"
-  "return"
-  "switch"
-  "throw"
-  "try"
-  "while"
-] @keyword.control
+  "break" "continue" "return"
+] @keyword.return
 
 [
-  "#define"
-  "#elif"
-  "#else"
-  "#endif"
-  "#if"
-  "#ifdef"
-  "#ifndef"
-  "#include"
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "while" "do"
+] @keyword.repeat
+
+[
+  "try" "catch" "throw"
+] @keyword.exception
+
+[
+  "co_await" "co_return" "co_yield"
+] @keyword.coroutine
+
+[
+  "#define" "#elif" "#else" "#endif" "#if" "#ifdef" "#ifndef" "#include"
   (preproc_directive)
-] @keyword.special
+] @keyword.directive
+
+[
+  "typedef" "concept" "requires" "decltype" "extern"
+] @keyword
 
 (comment) @comment
 
@@ -213,3 +191,15 @@
 
 (conditional_expression ":" @operator)
 (user_defined_literal (literal_suffix) @operator)
+
+[
+  (type_identifier)
+] @type
+
+[
+	(primitive_type)
+	(sized_type_specifier)
+] @type.builtin
+
+((primitive_type) @type.builtin.primitive
+	(#match? @type.builtin.primitive "^(void|char|short|int|long|float|double)$"))

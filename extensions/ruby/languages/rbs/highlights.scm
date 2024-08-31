@@ -30,13 +30,13 @@
   "interface"
   "type"
   "class"
-] @keyword.type
+] @keyword.typedef
 
 (class_decl
-  "end" @keyword.type)
+  "end" @keyword.typedef)
 
 (interface_decl
-  "end" @keyword.type)
+  "end" @keyword.typedef)
 
 "def" @keyword.function
 

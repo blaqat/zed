@@ -203,40 +203,49 @@
 ] @operator.comparison
 
 [
-  "as"
+  "global" "nonlocal"
+] @keyword.modifier
+
+[
   "class"
-  "def"
-  "del"
-  "exec"
-  "from"
-  "global"
-  "import"
-  "lambda"
-  "nonlocal"
-  "pass"
-  "print"
-  "yield"
-  "in"
-  "not in"
-] @keyword
+] @keyword.typedef
+
+[
+  "def" "lambda"
+] @keyword.function
+
+[
+  "import" "from" "as"
+] @keyword.import
+
+[
+  "return" "yield" "break" "continue" "pass"
+] @keyword.return
+
+[
+  "if" "elif" "else" "match" "case"
+] @keyword.conditional
+
+[
+  "for" "while"
+] @keyword.repeat
+
+[
+  "try" "except" "finally" "raise"
+] @keyword.exception
 
 [
   "assert"
-  "async"
-  "await"
-  "break"
-  "continue"
-  "elif"
-  "else"
-  "except"
-  "finally"
-  "for"
-  "if"
-  "raise"
-  "return"
-  "try"
-  "while"
-  "with"
-  "match"
-  "case"
-] @keyword.control
+] @keyword.debug
+
+[
+  "async" "await"
+] @keyword.coroutine
+
+[
+  "in" "not in"
+] @keyword.operator
+
+[
+  "del" "exec" "print" "with"
+] @keyword

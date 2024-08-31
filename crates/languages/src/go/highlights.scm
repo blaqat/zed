@@ -112,39 +112,44 @@
 ] @operator
 
 [
-  "chan"
-  "const"
-  "default"
+  "const" "var"
+] @keyword.modifier
+
+[
+  "type" (struct_type) (interface_type) (map_type) (function_type)
+] @keyword.typedef
+
+[
   "func"
-  "import"
-  "package"
-  "type"
-  "var"
-] @keyword
+] @keyword.function
 
 [
-	(struct_type)
-	(interface_type)
-	(map_type)
-	(function_type)
-] @keyword.special
+  "import" "package"
+] @keyword.import
 
 [
-  "break"
-  "case"
-  "continue"
+  "break" "continue" "return" "fallthrough"
+] @keyword.return
+
+[
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "range"
+] @keyword.repeat
+
+[
   "defer"
-  "else"
-  "fallthrough"
-  "for"
+] @keyword.exception
+
+[
   "go"
-  "goto"
-  "if"
-  "range"
-  "return"
-  "select"
-  "switch"
-] @keyword.control
+] @keyword.coroutine
+
+[
+  "chan" "select" "goto"
+] @keyword
 
 [
   (interpreted_string_literal)

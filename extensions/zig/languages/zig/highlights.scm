@@ -105,60 +105,47 @@ field_constant: (IDENTIFIER) @constant
 (BlockLabel (IDENTIFIER) @tag)
 
 [
-  "asm"
-  "defer"
-  "errdefer"
-  "test"
-  "struct"
-  "union"
-  "enum"
-  "opaque"
-  "error"
-] @keyword
-
-[
-  "async"
-  "await"
-  "suspend"
-  "nosuspend"
-  "resume"
-] @keyword.control.coroutine
-
-[
-  "fn"
-] @keyword
-
-[
   "and"
   "or"
   "orelse"
 ] @operator.logical
 
 [
-  "return"
-] @keyword.control.return
+  "const" "var" "volatile" "allowzero" "noalias" "align" "linksection"
+  "threadlocal" "pub" "export" "extern" "inline" "noinline" "comptime"
+] @keyword.modifier
 
 [
-  "if"
-  "else"
-  "switch"
-] @keyword.control.if
+  "struct" "union" "enum" "error"
+] @keyword.typedef
 
 [
-  "for"
-  "while"
-  "break"
-  "continue"
-] @keyword.control
+  "fn"
+] @keyword.function
 
 [
-  "usingnamespace"
+  "return" "break" "continue"
+] @keyword.return
+
+[
+  "if" "else" "switch"
+] @keyword.conditional
+
+[
+  "for" "while"
+] @keyword.repeat
+
+[
+  "try" "catch" "errdefer"
+] @keyword.exception
+
+[
+  "async" "await" "suspend" "nosuspend" "resume"
+] @keyword.coroutine
+
+[
+  "asm" "defer" "test" "opaque" "usingnamespace" "addrspace" "callconv" "packed"
 ] @keyword
-
-[
-  "try"
-  "catch"
-] @keyword.control
 
 [
   "anytype"

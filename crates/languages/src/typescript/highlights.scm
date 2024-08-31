@@ -203,71 +203,44 @@
   ">" @punctuation.bracket)
 
 ; Keywords
+[
+  "const" "let" "var" "static" "async" "await" "readonly" "abstract" "private" "protected" "public"
+] @keyword.modifier
 
 [
-  "as"
-  "await"
-  "class"
-  "const"
-  "delete"
-  "export"
-  "extends"
-  "from"
+  "class" "extends" "implements" "interface" "namespace" "type" "enum" "typeof" "keyof" "instanceof" "in"
+] @keyword.typedef
+
+[
   "function"
-  "get"
-  "import"
-  "in"
-  "instanceof"
-  "let"
-  "new"
-  "of"
-  "set"
-  "static"
-  "target"
-  "typeof"
-  "var"
-  "void"
-  "yield"
-] @keyword
+] @keyword.function
 
 [
-	"async"
-  "break"
-  "case"
-  "catch"
-  "continue"
-  "debugger"
-  "default"
-  "do"
-  "else"
-  "finally"
-  "for"
-  "if"
-  "return"
-  "satisfies"
-  "switch"
-  "throw"
-  "try"
-  "while"
-  "with"
-] @keyword.control
+  "import" "export" "from"
+] @keyword.import
 
-[ "abstract"
-  "declare"
-  "enum"
-  "export"
-  "implements"
-  "interface"
-  "keyof"
-  "namespace"
-  "private"
-  "protected"
-  "public"
-  "type"
-  "readonly"
-  "override"
-  ((identifier) @keyword
-	(#match?
-     @keyword
-     "^(global|module)$"))
+[
+  "return" "yield" "break" "continue"
+] @keyword.return
+
+[
+  "if" "else" "switch" "case" "default"
+] @keyword.conditional
+
+[
+  "for" "while" "do"
+] @keyword.repeat
+
+[
+  "try" "catch" "finally" "throw"
+] @keyword.exception
+
+[
+  "debugger"
+] @keyword.debug
+
+[
+  "satisfies" "declare" "override"
+  "delete" "void" "of" "new" "get" "set" "target" "as" "with"
+  ((identifier) @keyword (#match? @keyword "^(global|module)$"))
 ] @keyword
