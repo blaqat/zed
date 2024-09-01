@@ -132,7 +132,7 @@
 
 [
   "new" "sizeof" "typeof" "is" "as"
-] @keyword.operator
+] @keyword.op
 
 [
   "using" "extern"

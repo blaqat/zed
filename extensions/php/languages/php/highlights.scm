@@ -146,7 +146,7 @@
 
 [
   "clone" "new" "insteadof" "instanceof"
-] @keyword.operator
+] @keyword.op
 
 [
   "declare" "echo" "enddeclare" "endforeach" "endif" "endswitch" "endwhile"

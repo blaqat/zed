@@ -179,7 +179,7 @@
   "when"
   "xor"] @keyword
 
-["andalso" "orelse"] @keyword.operator
+["andalso" "orelse"] @keyword.op
 
 ;; Punctuation
 ["," "." ";"] @punctuation.delimiter

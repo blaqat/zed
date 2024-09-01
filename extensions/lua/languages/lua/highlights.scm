@@ -1,8 +1,8 @@
 ;; Keywords
 
 "goto" @keyword
-"local" @keyword.modifier
-"in" @keyword.operator
+"local" @keyword.op
+"in" @keyword.op
 
 [
 	"return" (break_statement)

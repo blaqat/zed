@@ -31,7 +31,7 @@
 
 [
   "in"
-] @keyword.operator
+] @keyword.op
 
 [
   "begin" "then" "do" "end"
