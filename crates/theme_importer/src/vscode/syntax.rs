@@ -235,7 +235,7 @@ impl ZedSyntaxToken {
             ZedSyntaxToken::LinkText => vec!["markup.underline.link", "string.other.link"],
             ZedSyntaxToken::LinkUri => vec!["markup.underline.link", "string.other.link"],
             ZedSyntaxToken::Number => vec!["constant.numeric", "number"],
-            ZedSyntaxToken::Operator => vec!["operator", "keyword.operator"],
+            ZedSyntaxToken::Operator => vec!["operator", "keyword.op"],
             ZedSyntaxToken::Predictive => vec![],
             ZedSyntaxToken::Preproc => vec![
                 "preproc",

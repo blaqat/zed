@@ -10,7 +10,7 @@
 
 [
   "sizeof"
-] @keyword.operator
+] @keyword.op
 
 [
   "break" "continue" "return"

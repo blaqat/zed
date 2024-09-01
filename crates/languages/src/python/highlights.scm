@@ -244,7 +244,7 @@
 
 [
   "in" "not in"
-] @keyword.operator
+] @keyword.op
 
 [
   "del" "exec" "print" "with"

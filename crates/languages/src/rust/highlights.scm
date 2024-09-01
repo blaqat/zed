@@ -137,7 +137,7 @@
 
 [
   "where" "in" "as"
-] @keyword.operator
+] @keyword.op
 
 [
   "let" "default" "macro_rules!" (super)

@@ -248,3 +248,4 @@
 (jsx_opening_element (["<" ">"]) @punctuation.bracket.tag)
 (jsx_closing_element (["</" ">"]) @punctuation.bracket.tag)
 (jsx_self_closing_element (["<" "/>"]) @punctuation.bracket.tag)
+(jsx_text) @text

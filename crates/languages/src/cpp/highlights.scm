@@ -60,7 +60,7 @@
 
 [
   "new" "delete" "sizeof"
-] @keyword.operator
+] @keyword.op
 
 [
   "using"
