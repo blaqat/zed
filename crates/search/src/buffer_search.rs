@@ -9,7 +9,7 @@ use any_vec::AnyVec;
 use collections::HashMap;
 use editor::{
     actions::{Tab, TabPrev},
-    DisplayPoint, Editor, EditorElement, EditorSettings, EditorStyle,
+    DisplayPoint, Editor, EditorElement, EditorSettings, EditorStyle, SearchSettings,
 };
 use futures::channel::oneshot;
 use gpui::{
@@ -22,7 +22,7 @@ use project::{
     search_history::{SearchHistory, SearchHistoryCursor},
 };
 use serde::Deserialize;
-use settings::Settings;
+use settings::{Settings, SettingsStore};
 use std::sync::Arc;
 use theme::ThemeSettings;
 
@@ -96,6 +96,7 @@ pub struct BufferSearchBar {
     scroll_handle: ScrollHandle,
     editor_scroll_handle: ScrollHandle,
     editor_needed_width: Pixels,
+    _subscriptions: Vec<Subscription>,
 }
 
 impl BufferSearchBar {
@@ -122,7 +123,7 @@ impl BufferSearchBar {
         };
 
         EditorElement::new(
-            &editor,
+            editor,
             EditorStyle {
                 background: cx.theme().colors().editor_background,
                 local_player: cx.theme().players().local(),
@@ -498,12 +499,18 @@ impl BufferSearchBar {
     }
 
     pub fn new(cx: &mut ViewContext<Self>) -> Self {
-        let query_editor = cx.new_view(|cx| Editor::single_line(cx));
+        let query_editor = cx.new_view(Editor::single_line);
         cx.subscribe(&query_editor, Self::on_query_editor_event)
             .detach();
-        let replacement_editor = cx.new_view(|cx| Editor::single_line(cx));
+        let replacement_editor = cx.new_view(Editor::single_line);
         cx.subscribe(&replacement_editor, Self::on_replacement_editor_event)
             .detach();
+
+        let search_options = SearchOptions::from_settings(&SearchSettings::get_global(cx));
+
+        let settings_subscription = cx.observe_global::<SettingsStore>(move |this, cx| {
+            this.default_options = SearchOptions::from_settings(&SearchSettings::get_global(cx));
+        });
 
         Self {
             query_editor,
@@ -514,8 +521,8 @@ impl BufferSearchBar {
             active_searchable_item_subscription: None,
             active_match_index: None,
             searchable_items_with_matches: Default::default(),
-            default_options: SearchOptions::NONE,
-            search_options: SearchOptions::NONE,
+            default_options: search_options,
+            search_options,
             pending_search: None,
             query_contains_error: false,
             dismissed: true,
@@ -530,6 +537,7 @@ impl BufferSearchBar {
             scroll_handle: ScrollHandle::new(),
             editor_scroll_handle: ScrollHandle::new(),
             editor_needed_width: px(0.),
+            _subscriptions: vec![settings_subscription],
         }
     }
 
@@ -602,6 +610,9 @@ impl BufferSearchBar {
         let Some(handle) = self.active_searchable_item.as_ref() else {
             return false;
         };
+        if self.default_options != self.search_options {
+            self.search_options = self.default_options;
+        }
 
         self.dismissed = false;
         handle.search_bar_visibility_changed(true, cx);
@@ -784,13 +795,12 @@ impl BufferSearchBar {
                     .filter(|matches| !matches.is_empty())
                 {
                     // If 'wrapscan' is disabled, searches do not wrap around the end of the file.
-                    if !EditorSettings::get_global(cx).search_wrap {
-                        if (direction == Direction::Next && index + count >= matches.len())
-                            || (direction == Direction::Prev && index < count)
-                        {
-                            crate::show_no_more_matches(cx);
-                            return;
-                        }
+                    if !EditorSettings::get_global(cx).search_wrap
+                        && ((direction == Direction::Next && index + count >= matches.len())
+                            || (direction == Direction::Prev && index < count))
+                    {
+                        crate::show_no_more_matches(cx);
+                        return;
                     }
                     let new_match_index = searchable_item
                         .match_index_for_direction(matches, index, direction, count, cx);
@@ -808,7 +818,7 @@ impl BufferSearchBar {
                 .searchable_items_with_matches
                 .get(&searchable_item.downgrade())
             {
-                if matches.len() == 0 {
+                if matches.is_empty() {
                     return;
                 }
                 let new_match_index = matches.len() - 1;
@@ -1100,7 +1110,7 @@ impl BufferSearchBar {
         cx.focus(handle);
     }
     fn toggle_replace(&mut self, _: &ToggleReplace, cx: &mut ViewContext<Self>) {
-        if let Some(_) = &self.active_searchable_item {
+        if self.active_searchable_item.is_some() {
             self.replace_enabled = !self.replace_enabled;
             let handle = if self.replace_enabled {
                 self.replacement_editor.focus_handle(cx)
@@ -1204,6 +1214,7 @@ mod tests {
             language::init(cx);
             Project::init_settings(cx);
             theme::init(theme::LoadThemes::JustBase, cx);
+            crate::init(cx);
         });
     }
 
@@ -1708,7 +1719,7 @@ mod tests {
         let last_match_selections = window
             .update(cx, |_, cx| {
                 assert!(
-                    editor.read(cx).is_focused(&cx),
+                    editor.read(cx).is_focused(cx),
                     "Should still have editor focused after SelectPrevMatch"
                 );
 
