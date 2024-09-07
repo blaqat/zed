@@ -72,10 +72,10 @@
 
 ; Builtin Types and Constants
 
-((identifier) @type.builtin
-	(#match?
-	 @type.builtin
-	"^(String|Result|Option|Box|Vec|HashMap|HashSet|BTreeMap|BTreeSet|Rc|Arc|Cell|RefCell|Mutex|RwLock|Cow|Path|PathBuf|OsString|OsStr|IpAddr|SocketAddr|Ipv4Addr|Ipv6Addr|Duration|Instant|SystemTime|Pin|Poll|Future|Stream|Pin|Task|Waker|RawWaker|RawWakerVTable)$") )
+; ((identifier) @type.builtin
+; 	(#match?
+; 	 @type.builtin
+; 	"^(String|Result|Option|Box|Vec|HashMap|HashSet|BTreeMap|BTreeSet|Rc|Arc|Cell|RefCell|Mutex|RwLock|Cow|Path|PathBuf|OsString|OsStr|IpAddr|SocketAddr|Ipv4Addr|Ipv6Addr|Duration|Instant|SystemTime|Pin|Poll|Future|Stream|Pin|Task|Waker|RawWaker|RawWakerVTable)$") )
 
 ((identifier) @type.builtin
 	(#match?
@@ -92,7 +92,7 @@
 ] @punctuation.bracket
 
 (_
-  .
+  ; .
   "<" @punctuation.bracket
   ">" @punctuation.bracket)
 
