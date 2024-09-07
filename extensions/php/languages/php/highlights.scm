@@ -129,7 +129,7 @@
 ] @keyword.import
 
 [
-  "return" "yield" "break" "continue"
+  "return" "yield" "break" "continue" "goto"
 ] @keyword.return
 
 [
@@ -137,7 +137,7 @@
 ] @keyword.conditional
 
 [
-  "for" "foreach" "while" "do"
+  "for" "foreach" "while" "do" "endfor"
 ] @keyword.repeat
 
 [
