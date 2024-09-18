@@ -13,7 +13,7 @@
 ] @keyword.op
 
 [
-  "break" "continue" "return"
+  "break" "continue" "return" "goto"
 ] @keyword.return
 
 [
@@ -79,11 +79,14 @@
 
 [
   "->"
+  "?"
+  ":"
 ] @operator
 
 [
   "."
   ";"
+  ","
 ] @punctuation.delimiter
 
 [

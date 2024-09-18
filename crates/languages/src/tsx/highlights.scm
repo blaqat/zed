@@ -242,7 +242,7 @@
 ] @keyword.debug
 
 [
-  "satisfies" "declare" "override"
+  "satisfies" "declare" "override" "is"
   "delete" "void" "of" "new" "get" "set" "target" "as" "with"
 ] @keyword
 

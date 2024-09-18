@@ -180,7 +180,6 @@
 	"*"
 	"+"
 	"-"
-	"/"
 ] @operator.arithmetic
 
 [
@@ -188,7 +187,6 @@
   "||"
   "?"
 ] @operator.logical
-(unary_expression ("!") @operator.logical)
 
 [
   "&"
@@ -221,6 +219,10 @@
   ">"
   ">="
 ] @operator.comparison
+
+; Avoid highlighting these as operators when used in doc comments.
+(unary_expression "!" @operator.logical)
+operator: "/" @operator
 
 (lifetime) @lifetime
 
