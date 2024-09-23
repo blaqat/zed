@@ -47,9 +47,17 @@
   (feature_name)
 ] @property
 
-(property_name) @constant
+(property_name) @property
 
 (function_name) @function
+
+(function_name) @function.builtin
+(#any-of? @function.builtin
+  "var" "rgb"  "rgba"  "hsl"  "hsla"  "calc" "clamp" "min"
+  "max" "url" "attr" "env" "counter" "counters" "repeat" "matrix" "matrix3d"
+  "translate" "translate3d" "translateX" "translateY" "translateZ" "scale" "scale3d" "scaleX" "scaleY" "scaleZ"
+  "rotate" "rotate3d" "rotateX" "rotateY" "rotateZ" "skew" "skewX" "skewY" "perspective"
+  "cubic-bezier" "steps" "linear-gradient" "radial-gradient" "conic-gradient" "repeating-linear-gradient" "repeating-radial-gradient" "repeating-conic-gradient" )
 
 (
   [
