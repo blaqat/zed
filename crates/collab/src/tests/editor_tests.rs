@@ -7,18 +7,12 @@ use collections::HashMap;
 use editor::{
     actions::{
         ConfirmCodeAction, ConfirmCompletion, ConfirmRename, ContextMenuFirst, Redo, Rename,
-        RevertSelectedHunks, ToggleCodeActions, Undo,
+        ToggleCodeActions, Undo,
     },
-    display_map::DisplayRow,
-    test::{
-        editor_hunks,
-        editor_test_context::{AssertionContextManager, EditorTestContext},
-        expanded_hunks, expanded_hunks_background_highlights,
-    },
+    test::editor_test_context::{AssertionContextManager, EditorTestContext},
     Editor,
 };
 use futures::StreamExt;
-use git::diff::DiffHunkStatus;
 use gpui::{TestAppContext, UpdateGlobal, VisualContext, VisualTestContext};
 use indoc::indoc;
 use language::{
@@ -82,7 +76,7 @@ async fn test_host_disconnect(
         .await
         .unwrap();
 
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
     cx_a.background_executor.run_until_parked();
 
     assert!(worktree_a.read_with(cx_a, |tree, _| tree.has_update_observer()));
@@ -198,7 +192,7 @@ async fn test_newline_above_or_below_does_not_move_guest_cursor(
         .await
         .unwrap();
 
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     // Open a buffer as client A
     let buffer_a = project_a
@@ -314,7 +308,7 @@ async fn test_collaborating_with_completion(cx_a: &mut TestAppContext, cx_b: &mu
         .update(cx_a, |call, cx| call.share_project(project_a.clone(), cx))
         .await
         .unwrap();
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     // Open a file in an editor as the guest.
     let buffer_b = project_b
@@ -385,51 +379,75 @@ async fn test_collaborating_with_completion(cx_a: &mut TestAppContext, cx_b: &mu
         .next()
         .await
         .unwrap();
-    cx_a.executor().finish_waiting();
-
     // Open the buffer on the host.
     let buffer_a = project_a
         .update(cx_a, |p, cx| p.open_buffer((worktree_id, "main.rs"), cx))
         .await
         .unwrap();
-    cx_a.executor().run_until_parked();
 
     buffer_a.read_with(cx_a, |buffer, _| {
         assert_eq!(buffer.text(), "fn main() { a. }")
-    });
-
-    // Confirm a completion on the guest.
-    editor_b.update(cx_b, |editor, cx| {
-        assert!(editor.context_menu_visible());
-        editor.confirm_completion(&ConfirmCompletion { item_ix: Some(0) }, cx);
-        assert_eq!(editor.text(cx), "fn main() { a.first_method() }");
     });
 
     // Return a resolved completion from the host's language server.
     // The resolved completion has an additional text edit.
     fake_language_server.handle_request::<lsp::request::ResolveCompletionItem, _, _>(
         |params, _| async move {
-            assert_eq!(params.label, "first_method(…)");
-            Ok(lsp::CompletionItem {
-                label: "first_method(…)".into(),
-                detail: Some("fn(&mut self, B) -> C".into()),
-                text_edit: Some(lsp::CompletionTextEdit::Edit(lsp::TextEdit {
-                    new_text: "first_method($1)".to_string(),
-                    range: lsp::Range::new(lsp::Position::new(0, 14), lsp::Position::new(0, 14)),
-                })),
-                additional_text_edits: Some(vec![lsp::TextEdit {
-                    new_text: "use d::SomeTrait;\n".to_string(),
-                    range: lsp::Range::new(lsp::Position::new(0, 0), lsp::Position::new(0, 0)),
-                }]),
-                insert_text_format: Some(lsp::InsertTextFormat::SNIPPET),
-                ..Default::default()
+            Ok(match params.label.as_str() {
+                "first_method(…)" => lsp::CompletionItem {
+                    label: "first_method(…)".into(),
+                    detail: Some("fn(&mut self, B) -> C".into()),
+                    text_edit: Some(lsp::CompletionTextEdit::Edit(lsp::TextEdit {
+                        new_text: "first_method($1)".to_string(),
+                        range: lsp::Range::new(
+                            lsp::Position::new(0, 14),
+                            lsp::Position::new(0, 14),
+                        ),
+                    })),
+                    additional_text_edits: Some(vec![lsp::TextEdit {
+                        new_text: "use d::SomeTrait;\n".to_string(),
+                        range: lsp::Range::new(lsp::Position::new(0, 0), lsp::Position::new(0, 0)),
+                    }]),
+                    insert_text_format: Some(lsp::InsertTextFormat::SNIPPET),
+                    ..Default::default()
+                },
+                "second_method(…)" => lsp::CompletionItem {
+                    label: "second_method(…)".into(),
+                    detail: Some("fn(&mut self, C) -> D<E>".into()),
+                    text_edit: Some(lsp::CompletionTextEdit::Edit(lsp::TextEdit {
+                        new_text: "second_method()".to_string(),
+                        range: lsp::Range::new(
+                            lsp::Position::new(0, 14),
+                            lsp::Position::new(0, 14),
+                        ),
+                    })),
+                    insert_text_format: Some(lsp::InsertTextFormat::SNIPPET),
+                    additional_text_edits: Some(vec![lsp::TextEdit {
+                        new_text: "use d::SomeTrait;\n".to_string(),
+                        range: lsp::Range::new(lsp::Position::new(0, 0), lsp::Position::new(0, 0)),
+                    }]),
+                    ..Default::default()
+                },
+                _ => panic!("unexpected completion label: {:?}", params.label),
             })
         },
     );
-
-    // The additional edit is applied.
+    cx_a.executor().finish_waiting();
     cx_a.executor().run_until_parked();
 
+    // Confirm a completion on the guest.
+    editor_b
+        .update(cx_b, |editor, cx| {
+            assert!(editor.context_menu_visible());
+            editor.confirm_completion(&ConfirmCompletion { item_ix: Some(0) }, cx)
+        })
+        .unwrap()
+        .await
+        .unwrap();
+    cx_a.executor().run_until_parked();
+    cx_b.executor().run_until_parked();
+
+    // The additional edit is applied.
     buffer_a.read_with(cx_a, |buffer, _| {
         assert_eq!(
             buffer.text(),
@@ -522,9 +540,15 @@ async fn test_collaborating_with_completion(cx_a: &mut TestAppContext, cx_b: &mu
     cx_b.executor().run_until_parked();
 
     // When accepting the completion, the snippet is insert.
+    editor_b
+        .update(cx_b, |editor, cx| {
+            assert!(editor.context_menu_visible());
+            editor.confirm_completion(&ConfirmCompletion { item_ix: Some(0) }, cx)
+        })
+        .unwrap()
+        .await
+        .unwrap();
     editor_b.update(cx_b, |editor, cx| {
-        assert!(editor.context_menu_visible());
-        editor.confirm_completion(&ConfirmCompletion { item_ix: Some(0) }, cx);
         assert_eq!(
             editor.text(cx),
             "use d::SomeTrait;\nfn main() { a.first_method(); a.third_method(, , ) }"
@@ -571,7 +595,7 @@ async fn test_collaborating_with_code_actions(
         .unwrap();
 
     // Join the project as client B.
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
     let (workspace_b, cx_b) = client_b.build_workspace(&project_b, cx_b);
     let editor_b = workspace_b
         .update(cx_b, |workspace, cx| {
@@ -786,7 +810,7 @@ async fn test_collaborating_with_renames(cx_a: &mut TestAppContext, cx_b: &mut T
         .update(cx_a, |call, cx| call.share_project(project_a.clone(), cx))
         .await
         .unwrap();
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     let (workspace_b, cx_b) = client_b.build_workspace(&project_b, cx_b);
     let editor_b = workspace_b
@@ -1036,7 +1060,7 @@ async fn test_language_server_statuses(cx_a: &mut TestAppContext, cx_b: &mut Tes
         .await
         .unwrap();
     executor.run_until_parked();
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     project_b.read_with(cx_b, |project, cx| {
         let status = project.language_server_statuses(cx).next().unwrap().1;
@@ -1132,9 +1156,7 @@ async fn test_share_project(
         .await
         .unwrap();
     let client_b_peer_id = client_b.peer_id().unwrap();
-    let project_b = client_b
-        .build_dev_server_project(initial_project.id, cx_b)
-        .await;
+    let project_b = client_b.join_remote_project(initial_project.id, cx_b).await;
 
     let replica_id_b = project_b.read_with(cx_b, |project, _| project.replica_id());
 
@@ -1236,9 +1258,7 @@ async fn test_share_project(
         .update(cx_c, |call, cx| call.accept_incoming(cx))
         .await
         .unwrap();
-    let _project_c = client_c
-        .build_dev_server_project(initial_project.id, cx_c)
-        .await;
+    let _project_c = client_c.join_remote_project(initial_project.id, cx_c).await;
 
     // Client B closes the editor, and client A sees client B's selections removed.
     cx_b.update(move |_| drop(editor_b));
@@ -1297,7 +1317,7 @@ async fn test_on_input_format_from_host_to_guest(
         .update(cx_a, |call, cx| call.share_project(project_a.clone(), cx))
         .await
         .unwrap();
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     // Open a file in an editor as the host.
     let buffer_a = project_a
@@ -1417,7 +1437,7 @@ async fn test_on_input_format_from_guest_to_host(
         .update(cx_a, |call, cx| call.share_project(project_a.clone(), cx))
         .await
         .unwrap();
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
 
     // Open a file in an editor as the guest.
     let buffer_b = project_b
@@ -1580,7 +1600,7 @@ async fn test_mutual_editor_inlay_hint_cache_update(
         .unwrap();
 
     // Client B joins the project
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
     active_call_b
         .update(cx_b, |call, cx| call.set_location(Some(&project_b), cx))
         .await
@@ -1842,7 +1862,7 @@ async fn test_inlay_hint_refresh_is_forwarded(
         .await
         .unwrap();
 
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
     active_call_b
         .update(cx_b, |call, cx| call.set_location(Some(&project_b), cx))
         .await
@@ -1970,288 +1990,6 @@ async fn test_inlay_hint_refresh_is_forwarded(
     });
 }
 
-#[gpui::test]
-async fn test_multiple_hunk_types_revert(cx_a: &mut TestAppContext, cx_b: &mut TestAppContext) {
-    let mut server = TestServer::start(cx_a.executor()).await;
-    let client_a = server.create_client(cx_a, "user_a").await;
-    let client_b = server.create_client(cx_b, "user_b").await;
-    server
-        .create_room(&mut [(&client_a, cx_a), (&client_b, cx_b)])
-        .await;
-    let active_call_a = cx_a.read(ActiveCall::global);
-    let active_call_b = cx_b.read(ActiveCall::global);
-
-    cx_a.update(editor::init);
-    cx_b.update(editor::init);
-
-    client_a.language_registry().add(rust_lang());
-    client_b.language_registry().add(rust_lang());
-
-    let base_text = indoc! {r#"struct Row;
-struct Row1;
-struct Row2;
-
-struct Row4;
-struct Row5;
-struct Row6;
-
-struct Row8;
-struct Row9;
-struct Row10;"#};
-
-    client_a
-        .fs()
-        .insert_tree(
-            "/a",
-            json!({
-                "main.rs": base_text,
-            }),
-        )
-        .await;
-    let (project_a, worktree_id) = client_a.build_local_project("/a", cx_a).await;
-    active_call_a
-        .update(cx_a, |call, cx| call.set_location(Some(&project_a), cx))
-        .await
-        .unwrap();
-    let project_id = active_call_a
-        .update(cx_a, |call, cx| call.share_project(project_a.clone(), cx))
-        .await
-        .unwrap();
-
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
-    active_call_b
-        .update(cx_b, |call, cx| call.set_location(Some(&project_b), cx))
-        .await
-        .unwrap();
-
-    let (workspace_a, cx_a) = client_a.build_workspace(&project_a, cx_a);
-    let (workspace_b, cx_b) = client_b.build_workspace(&project_b, cx_b);
-
-    let editor_a = workspace_a
-        .update(cx_a, |workspace, cx| {
-            workspace.open_path((worktree_id, "main.rs"), None, true, cx)
-        })
-        .await
-        .unwrap()
-        .downcast::<Editor>()
-        .unwrap();
-
-    let editor_b = workspace_b
-        .update(cx_b, |workspace, cx| {
-            workspace.open_path((worktree_id, "main.rs"), None, true, cx)
-        })
-        .await
-        .unwrap()
-        .downcast::<Editor>()
-        .unwrap();
-
-    let mut editor_cx_a = EditorTestContext {
-        cx: cx_a.clone(),
-        window: cx_a.handle(),
-        editor: editor_a,
-        assertion_cx: AssertionContextManager::new(),
-    };
-    let mut editor_cx_b = EditorTestContext {
-        cx: cx_b.clone(),
-        window: cx_b.handle(),
-        editor: editor_b,
-        assertion_cx: AssertionContextManager::new(),
-    };
-
-    // host edits the file, that differs from the base text, producing diff hunks
-    editor_cx_a.set_state(indoc! {r#"struct Row;
-        struct Row0.1;
-        struct Row0.2;
-        struct Row1;
-
-        struct Row4;
-        struct Row5444;
-        struct Row6;
-
-        struct Row9;
-        struct Row1220;ˇ"#});
-    editor_cx_a.update_editor(|editor, cx| {
-        editor
-            .buffer()
-            .read(cx)
-            .as_singleton()
-            .unwrap()
-            .update(cx, |buffer, cx| {
-                buffer.set_diff_base(Some(base_text.into()), cx);
-            });
-    });
-    editor_cx_b.update_editor(|editor, cx| {
-        editor
-            .buffer()
-            .read(cx)
-            .as_singleton()
-            .unwrap()
-            .update(cx, |buffer, cx| {
-                buffer.set_diff_base(Some(base_text.into()), cx);
-            });
-    });
-    cx_a.executor().run_until_parked();
-    cx_b.executor().run_until_parked();
-
-    // the client selects a range in the updated buffer, expands it to see the diff for each hunk in the selection
-    // the host does not see the diffs toggled
-    editor_cx_b.set_selections_state(indoc! {r#"«ˇstruct Row;
-        struct Row0.1;
-        struct Row0.2;
-        struct Row1;
-
-        struct Row4;
-        struct Row5444;
-        struct Row6;
-
-        struct R»ow9;
-        struct Row1220;"#});
-    editor_cx_b
-        .update_editor(|editor, cx| editor.toggle_hunk_diff(&editor::actions::ToggleHunkDiff, cx));
-    cx_a.executor().run_until_parked();
-    cx_b.executor().run_until_parked();
-    editor_cx_a.update_editor(|editor, cx| {
-        let snapshot = editor.snapshot(cx);
-        let all_hunks = editor_hunks(editor, &snapshot, cx);
-        let all_expanded_hunks = expanded_hunks(editor, &snapshot, cx);
-        assert_eq!(expanded_hunks_background_highlights(editor, cx), Vec::new());
-        assert_eq!(
-            all_hunks,
-            vec![
-                (
-                    "".to_string(),
-                    DiffHunkStatus::Added,
-                    DisplayRow(1)..DisplayRow(3)
-                ),
-                (
-                    "struct Row2;\n".to_string(),
-                    DiffHunkStatus::Removed,
-                    DisplayRow(4)..DisplayRow(4)
-                ),
-                (
-                    "struct Row5;\n".to_string(),
-                    DiffHunkStatus::Modified,
-                    DisplayRow(6)..DisplayRow(7)
-                ),
-                (
-                    "struct Row8;\n".to_string(),
-                    DiffHunkStatus::Removed,
-                    DisplayRow(9)..DisplayRow(9)
-                ),
-                (
-                    "struct Row10;".to_string(),
-                    DiffHunkStatus::Modified,
-                    DisplayRow(10)..DisplayRow(10),
-                ),
-            ]
-        );
-        assert_eq!(all_expanded_hunks, Vec::new());
-    });
-    editor_cx_b.update_editor(|editor, cx| {
-        let snapshot = editor.snapshot(cx);
-        let all_hunks = editor_hunks(editor, &snapshot, cx);
-        let all_expanded_hunks = expanded_hunks(editor, &snapshot, cx);
-        assert_eq!(
-            expanded_hunks_background_highlights(editor, cx),
-            vec![DisplayRow(1)..=DisplayRow(2), DisplayRow(8)..=DisplayRow(8)],
-        );
-        assert_eq!(
-            all_hunks,
-            vec![
-                (
-                    "".to_string(),
-                    DiffHunkStatus::Added,
-                    DisplayRow(1)..DisplayRow(3)
-                ),
-                (
-                    "struct Row2;\n".to_string(),
-                    DiffHunkStatus::Removed,
-                    DisplayRow(5)..DisplayRow(5)
-                ),
-                (
-                    "struct Row5;\n".to_string(),
-                    DiffHunkStatus::Modified,
-                    DisplayRow(8)..DisplayRow(9)
-                ),
-                (
-                    "struct Row8;\n".to_string(),
-                    DiffHunkStatus::Removed,
-                    DisplayRow(12)..DisplayRow(12)
-                ),
-                (
-                    "struct Row10;".to_string(),
-                    DiffHunkStatus::Modified,
-                    DisplayRow(13)..DisplayRow(13),
-                ),
-            ]
-        );
-        assert_eq!(all_expanded_hunks, &all_hunks[..all_hunks.len() - 1]);
-    });
-
-    // the client reverts the hunks, removing the expanded diffs too
-    // both host and the client observe the reverted state (with one hunk left, not covered by client's selection)
-    editor_cx_b.update_editor(|editor, cx| {
-        editor.revert_selected_hunks(&RevertSelectedHunks, cx);
-    });
-    cx_a.executor().run_until_parked();
-    cx_b.executor().run_until_parked();
-    editor_cx_a.update_editor(|editor, cx| {
-        let snapshot = editor.snapshot(cx);
-        let all_hunks = editor_hunks(editor, &snapshot, cx);
-        let all_expanded_hunks = expanded_hunks(editor, &snapshot, cx);
-        assert_eq!(expanded_hunks_background_highlights(editor, cx), Vec::new());
-        assert_eq!(
-            all_hunks,
-            vec![(
-                "struct Row10;".to_string(),
-                DiffHunkStatus::Modified,
-                DisplayRow(10)..DisplayRow(10),
-            )]
-        );
-        assert_eq!(all_expanded_hunks, Vec::new());
-    });
-    editor_cx_b.update_editor(|editor, cx| {
-        let snapshot = editor.snapshot(cx);
-        let all_hunks = editor_hunks(editor, &snapshot, cx);
-        let all_expanded_hunks = expanded_hunks(editor, &snapshot, cx);
-        assert_eq!(
-            expanded_hunks_background_highlights(editor, cx),
-            vec![DisplayRow(5)..=DisplayRow(5)]
-        );
-        assert_eq!(
-            all_hunks,
-            vec![(
-                "struct Row10;".to_string(),
-                DiffHunkStatus::Modified,
-                DisplayRow(10)..DisplayRow(10),
-            )]
-        );
-        assert_eq!(all_expanded_hunks, Vec::new());
-    });
-    editor_cx_a.assert_editor_state(indoc! {r#"struct Row;
-        struct Row1;
-        struct Row2;
-
-        struct Row4;
-        struct Row5;
-        struct Row6;
-
-        struct Row8;
-        struct Row9;
-        struct Row1220;ˇ"#});
-    editor_cx_b.assert_editor_state(indoc! {r#"«ˇstruct Row;
-        struct Row1;
-        struct Row2;
-
-        struct Row4;
-        struct Row5;
-        struct Row6;
-
-        struct Row8;
-        struct R»ow9;
-        struct Row1220;"#});
-}
-
 #[gpui::test(iterations = 10)]
 async fn test_git_blame_is_forwarded(cx_a: &mut TestAppContext, cx_b: &mut TestAppContext) {
     let mut server = TestServer::start(cx_a.executor()).await;
@@ -2338,7 +2076,7 @@ async fn test_git_blame_is_forwarded(cx_a: &mut TestAppContext, cx_b: &mut TestA
         .unwrap();
 
     // Join the project as client B.
-    let project_b = client_b.build_dev_server_project(project_id, cx_b).await;
+    let project_b = client_b.join_remote_project(project_id, cx_b).await;
     let (workspace_b, cx_b) = client_b.build_workspace(&project_b, cx_b);
     let editor_b = workspace_b
         .update(cx_b, |workspace, cx| {

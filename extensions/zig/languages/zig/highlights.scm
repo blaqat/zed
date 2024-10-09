@@ -162,9 +162,6 @@ field_constant: (IDENTIFIER) @constant
   "volatile"
   "allowzero"
   "noalias"
-] @keyword
-
-[
   "addrspace"
   "align"
   "callconv"
@@ -180,7 +177,29 @@ field_constant: (IDENTIFIER) @constant
   "packed"
   "pub"
   "threadlocal"
+  "async"
+  "await"
+  "suspend"
+  "nosuspend"
+  "resume"
+  "and"
+  "or"
+  "orelse"
+  "return"
+  "if"
+  "else"
+  "switch"
 ] @keyword
+
+[
+  "usingnamespace"
+] @constant
+
+[
+  "anytype"
+  "anyframe"
+  (BuildinTypeExpr)
+] @type
 
 [
   "null"
