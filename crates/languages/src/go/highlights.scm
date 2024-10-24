@@ -157,7 +157,7 @@
   (rune_literal)
 ] @string
 
-(escape_sequence) @escape
+(escape_sequence) @string.escape
 
 [
   (int_literal)

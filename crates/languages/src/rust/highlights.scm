@@ -97,6 +97,7 @@
   ">" @punctuation.bracket)
 
 [
+  "."
   ";"
   ","
   "::"
@@ -148,6 +149,8 @@
   (raw_string_literal)
   (char_literal)
 ] @string
+
+(escape_sequence) @string.escape
 
 [
   (integer_literal)

@@ -1,5 +1,6 @@
 pub mod access_token;
 pub mod billing_customer;
+pub mod billing_preference;
 pub mod billing_subscription;
 pub mod buffer;
 pub mod buffer_operation;
@@ -12,8 +13,6 @@ pub mod channel_message;
 pub mod channel_message_mention;
 pub mod contact;
 pub mod contributor;
-pub mod dev_server;
-pub mod dev_server_project;
 pub mod embedding;
 pub mod extension;
 pub mod extension_version;
