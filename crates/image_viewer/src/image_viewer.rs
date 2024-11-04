@@ -1,3 +1,4 @@
+use anyhow::Context as _;
 use gpui::{
     canvas, div, fill, img, opaque_grey, point, size, AnyElement, AppContext, Bounds, Context,
     EventEmitter, FocusHandle, FocusableView, Img, InteractiveElement, IntoElement, Model,
@@ -5,6 +6,7 @@ use gpui::{
     WindowContext,
 };
 use persistence::IMAGE_VIEWER;
+use theme::Theme;
 use ui::prelude::*;
 
 use file_icons::FileIcons;
@@ -12,15 +14,17 @@ use project::{Project, ProjectEntryId, ProjectPath};
 use settings::Settings;
 use std::{ffi::OsStr, path::PathBuf};
 use workspace::{
-    item::{Item, ProjectItem, SerializableItem, TabContentParams},
-    ItemId, ItemSettings, Pane, Workspace, WorkspaceId,
+    item::{BreadcrumbText, Item, ProjectItem, SerializableItem, TabContentParams},
+    ItemId, ItemSettings, Pane, ToolbarItemLocation, Workspace, WorkspaceId,
 };
 
 const IMAGE_VIEWER_KIND: &str = "ImageView";
 
 pub struct ImageItem {
+    id: ProjectEntryId,
     path: PathBuf,
     project_path: ProjectPath,
+    project: Model<Project>,
 }
 
 impl project::Item for ImageItem {
@@ -48,9 +52,16 @@ impl project::Item for ImageItem {
                     .read_with(&cx, |project, cx| project.absolute_path(&path, cx))?
                     .ok_or_else(|| anyhow::anyhow!("Failed to find the absolute path"))?;
 
+                let id = project
+                    .update(&mut cx, |project, cx| project.entry_for_path(&path, cx))?
+                    .context("Entry not found")?
+                    .id;
+
                 cx.new_model(|_| ImageItem {
+                    project,
                     path: abs_path,
                     project_path: path,
+                    id,
                 })
             }))
         } else {
@@ -59,7 +70,7 @@ impl project::Item for ImageItem {
     }
 
     fn entry_id(&self, _: &AppContext) -> Option<ProjectEntryId> {
-        None
+        Some(self.id)
     }
 
     fn project_path(&self, _: &AppContext) -> Option<ProjectPath> {
@@ -68,18 +79,30 @@ impl project::Item for ImageItem {
 }
 
 pub struct ImageView {
-    path: PathBuf,
+    image: Model<ImageItem>,
     focus_handle: FocusHandle,
 }
 
 impl Item for ImageView {
     type Event = ();
 
-    fn tab_content(&self, params: TabContentParams, _cx: &WindowContext) -> AnyElement {
-        let title = self
-            .path
+    fn for_each_project_item(
+        &self,
+        cx: &AppContext,
+        f: &mut dyn FnMut(gpui::EntityId, &dyn project::Item),
+    ) {
+        f(self.image.entity_id(), self.image.read(cx))
+    }
+
+    fn is_singleton(&self, _cx: &AppContext) -> bool {
+        true
+    }
+
+    fn tab_content(&self, params: TabContentParams, cx: &WindowContext) -> AnyElement {
+        let path = &self.image.read(cx).path;
+        let title = path
             .file_name()
-            .unwrap_or_else(|| self.path.as_os_str())
+            .unwrap_or_else(|| path.as_os_str())
             .to_string_lossy()
             .to_string();
         Label::new(title)
@@ -90,11 +113,25 @@ impl Item for ImageView {
     }
 
     fn tab_icon(&self, cx: &WindowContext) -> Option<Icon> {
+        let path = &self.image.read(cx).path;
         ItemSettings::get_global(cx)
             .file_icons
-            .then(|| FileIcons::get_icon(self.path.as_path(), cx))
+            .then(|| FileIcons::get_icon(path.as_path(), cx))
             .flatten()
             .map(Icon::from_path)
+    }
+
+    fn breadcrumb_location(&self) -> ToolbarItemLocation {
+        ToolbarItemLocation::PrimaryLeft
+    }
+
+    fn breadcrumbs(&self, _theme: &Theme, cx: &AppContext) -> Option<Vec<BreadcrumbText>> {
+        let text = breadcrumbs_text_for_image(self.image.read(cx), cx);
+        Some(vec![BreadcrumbText {
+            text,
+            highlights: None,
+            font: None,
+        }])
     }
 
     fn clone_on_split(
@@ -106,10 +143,29 @@ impl Item for ImageView {
         Self: Sized,
     {
         Some(cx.new_view(|cx| Self {
-            path: self.path.clone(),
+            image: self.image.clone(),
             focus_handle: cx.focus_handle(),
         }))
     }
+}
+
+fn breadcrumbs_text_for_image(image: &ImageItem, cx: &AppContext) -> String {
+    let path = &image.project_path.path;
+    let project = image.project.read(cx);
+
+    if project.visible_worktrees(cx).count() <= 1 {
+        return path.to_string_lossy().to_string();
+    }
+
+    project
+        .worktree_for_entry(image.id, cx)
+        .map(|worktree| {
+            PathBuf::from(worktree.read(cx).root_name())
+                .join(path)
+                .to_string_lossy()
+                .to_string()
+        })
+        .unwrap_or_else(|| path.to_string_lossy().to_string())
 }
 
 impl SerializableItem for ImageView {
@@ -118,7 +174,7 @@ impl SerializableItem for ImageView {
     }
 
     fn deserialize(
-        _project: Model<Project>,
+        project: Model<Project>,
         _workspace: WeakView<Workspace>,
         workspace_id: WorkspaceId,
         item_id: ItemId,
@@ -129,10 +185,39 @@ impl SerializableItem for ImageView {
                 .get_image_path(item_id, workspace_id)?
                 .ok_or_else(|| anyhow::anyhow!("No image path found"))?;
 
-            cx.new_view(|cx| ImageView {
-                path: image_path,
-                focus_handle: cx.focus_handle(),
-            })
+            let (worktree, relative_path) = project
+                .update(&mut cx, |project, cx| {
+                    project.find_or_create_worktree(image_path.clone(), false, cx)
+                })?
+                .await
+                .context("Path not found")?;
+            let worktree_id = worktree.update(&mut cx, |worktree, _cx| worktree.id())?;
+
+            let project_path = ProjectPath {
+                worktree_id,
+                path: relative_path.into(),
+            };
+
+            let id = project
+                .update(&mut cx, |project, cx| {
+                    project.entry_for_path(&project_path, cx)
+                })?
+                .context("No entry found")?
+                .id;
+
+            cx.update(|cx| {
+                let image = cx.new_model(|_| ImageItem {
+                    id,
+                    path: image_path,
+                    project_path,
+                    project,
+                });
+
+                Ok(cx.new_view(|cx| ImageView {
+                    image,
+                    focus_handle: cx.focus_handle(),
+                }))
+            })?
         })
     }
 
@@ -154,7 +239,7 @@ impl SerializableItem for ImageView {
         let workspace_id = workspace.database_id()?;
 
         Some(cx.background_executor().spawn({
-            let image_path = self.path.clone();
+            let image_path = self.image.read(cx).path.clone();
             async move {
                 IMAGE_VIEWER
                     .save_image_path(item_id, workspace_id, image_path)
@@ -177,6 +262,7 @@ impl FocusableView for ImageView {
 
 impl Render for ImageView {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
+        let image_path = self.image.read(cx).path.clone();
         let checkered_background = |bounds: Bounds<Pixels>, _, cx: &mut WindowContext| {
             let square_size = 32.0;
 
@@ -221,7 +307,7 @@ impl Render for ImageView {
             .left_0();
 
         div()
-            .track_focus(&self.focus_handle)
+            .track_focus(&self.focus_handle(cx))
             .size_full()
             .child(checkered_background)
             .child(
@@ -233,7 +319,7 @@ impl Render for ImageView {
                     // TODO: In browser based Tailwind & Flex this would be h-screen and we'd use w-full
                     .h_full()
                     .child(
-                        img(self.path.clone())
+                        img(image_path)
                             .object_fit(ObjectFit::ScaleDown)
                             .max_w_full()
                             .max_h_full(),
@@ -254,7 +340,7 @@ impl ProjectItem for ImageView {
         Self: Sized,
     {
         Self {
-            path: item.read(cx).path.clone(),
+            image: item,
             focus_handle: cx.focus_handle(),
         }
     }

@@ -4,6 +4,15 @@
 (keyword_argument
 	name: (identifier) @variable.parameter
 	value: (identifier) @variable)
+(generic_type (identifier) @type.builtin)
+
+; Type alias
+(type_alias_statement "type" @keyword)
+
+; TypeVar with constraints in type parameters
+(type
+  (tuple (identifier) @type)
+)
 
 ; Function calls
 
